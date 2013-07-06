@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.googlecode.luceneappengine</groupId>
+	<artifactId>luceneappengine</artifactId>
+	<version>4.3.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>${gae.application.name}</name>
+	<url>http://${googlecode.host}</url>
+	<description>A Lucene directory for Google App Engine.</description>
+
+	<mailingLists>
+		<mailingList>
+			<name>Lucene App Engine Users List</name>
+			<archive>http://groups.google.com/group/${googlecode.group.users}/topics</archive>
+			<subscribe>http://groups.google.com/group/${googlecode.group.users}/subscribe</subscribe>
+			<unsubscribe>http://groups.google.com/group/${googlecode.group.users}/subscribe</unsubscribe>
+			<post>http://groups.google.com/group/${googlecode.group.users}/post</post>
+		</mailingList>
+		<mailingList>
+			<name>Lucene App Engine Developers List</name>
+			<archive>http://groups.google.com/group/${googlecode.group.developers}/topics</archive>
+			<subscribe>http://groups.google.com/group/${googlecode.group.developers}/subscribe</subscribe>
+			<unsubscribe>http://groups.google.com/group/${googlecode.group.developers}/subscribe</unsubscribe>
+			<post>http://groups.google.com/group/${googlecode.group.developers}/post</post>
+		</mailingList>
+	</mailingLists>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-resource-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.14.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.2.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.9</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.3.2</version>
+				</plugin>
+				<plugin>
+				    <artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-scm</artifactId>
+				<version>${wagon.scm.version}</version>
+			</extension>
+			<extension>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-manager-plexus</artifactId>
+				<version>${wagon.scm.provider.version}</version>
+			</extension>
+			<extension>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-provider-hg</artifactId>
+				<version>${wagon.scm.provider.version}</version>
+			</extension>
+		</extensions>
+
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>update-project-license</id>
+						<goals>
+							<goal>update-project-license</goal>
+							<goal>add-third-party</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-site-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-scm</artifactId>
+						<version>${wagon.scm.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-manager-plexus</artifactId>
+						<version>${wagon.scm.provider.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-hg</artifactId>
+						<version>${wagon.scm.provider.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<links>
+						<link>http://lucene.apache.org/core/3_6_1/api/all</link>
+						<link>http://objectify-appengine.googlecode.com/svn/tags/3.1/javadoc</link>
+					</links>
+					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- explicitly define maven-deploy-plugin after other to force exec 
+					order -->
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-scm</artifactId>
+						<version>${wagon.scm.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-manager-plexus</artifactId>
+						<version>${wagon.scm.provider.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-hg</artifactId>
+						<version>${wagon.scm.provider.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<!-- The actual maven-gae-plugin. Type "mvn gae:run" to run project, "mvn 
+				gae:deploy" to upload to GAE. -->
+			<plugin>
+				<groupId>net.kindleit</groupId>
+				<artifactId>maven-gae-plugin</artifactId>
+				<version>${gae.plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>net.kindleit</groupId>
+						<artifactId>gae-runtime</artifactId>
+						<version>${gae.version}</version>
+						<type>pom</type>
+					</dependency>
+				</dependencies>
+				<!-- mvn gae:debug sometimes freeze but using gae:run with debug options 
+					should work -->
+				<configuration>
+					<jvmFlags>
+						<jvmFlag>-Xdebug</jvmFlag>
+						<jvmFlag>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</jvmFlag>
+						<jvmFlag>-noverify</jvmFlag>
+					</jvmFlags>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+		<argLine>-Xmx512m</argLine>
+		<wagon.scm.version>2.4</wagon.scm.version>
+		<wagon.scm.provider.version>1.8.1</wagon.scm.provider.version>
+		<pushChanges>false</pushChanges>
+
+		<license.licenseName>apache_v2</license.licenseName>
+		<license.generateBundle>true</license.generateBundle>
+		<license.includedGroups>org.apache.lucene</license.includedGroups>
+		<license.includedArtifacts>lucene-core</license.includedArtifacts>
+
+		<objectify.version>4.0rc1</objectify.version>
+		<lucene.version>4.3.0</lucene.version>
+
+		<slf4j.version>1.7.5</slf4j.version>
+		<logback.version>1.0.7</logback.version>
+
+		<gae.plugin.version>0.9.6</gae.plugin.version>
+		<gae.version>1.8.0</gae.version>
+		<gae.application.name>luceneappengine</gae.application.name>
+		<gae.application.version>test</gae.application.version>
+		<gae.serverId>luceneappengine</gae.serverId>
+
+		<!-- custom -->
+		<googlecode.group.users>${project.artifactId}</googlecode.group.users>
+		<googlecode.group.developers>${project.artifactId}</googlecode.group.developers>
+		<googlecode.project>luceneappengine</googlecode.project>
+		<googlecode.host>${googlecode.project}.googlecode.com</googlecode.host>
+	</properties>
+	<distributionManagement>
+		<repository>
+			<!-- <id>lucene-appengine</id> -->
+			<id>nexus-local</id>
+			<name>Maven Repository for LAE Releases</name>
+			<!-- <url>scm:hg:https://repo.${googlecode.host}/hg/releases</url> -->
+			<url>http://localhost:8081/nexus/content/repositories/releases</url>
+			<uniqueVersion>true</uniqueVersion>
+		</repository>
+		<snapshotRepository>
+			<!-- <id>lucene-appengine</id> -->
+			<id>nexus-local</id>
+			<name>Maven Repository for LAE Snapshots</name>
+			<!-- <url>scm:hg:https://repo.${googlecode.host}/hg/snapshots</url> -->
+			<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+		<site>
+			<id>lucene-appengine</id>
+			<url>scm:hg:https://maven-site.${googlecode.host}/hg</url>
+		</site>
+	</distributionManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-1.0-sdk</artifactId>
+			<version>${gae.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.objectify</groupId>
+			<artifactId>objectify</artifactId>
+			<version>${objectify.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${lucene.version}</version>
+			<!-- thanks to this scope user should not copy RamUsageEstimator class -->
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+			<version>${lucene.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit-dep</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<version>1.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- GAE libraries for local testing as described here: http://code.google.com/appengine/docs/java/howto/unittesting.html -->
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-labs</artifactId>
+			<version>${gae.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-stubs</artifactId>
+			<version>${gae.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-testing</artifactId>
+			<version>${gae.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<scm>
+		<connection>scm:hg:http://${googlecode.host}/hg</connection>
+		<developerConnection>scm:hg:http://${googlecode.host}/hg</developerConnection>
+		<url>http://code.google.com/p/${googlecode.project}/source/browse</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<issueManagement>
+		<system>Google Code</system>
+		<url>http://code.google.com/p/${googlecode.project}/issues</url>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+      		<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>fabio.grucci</id>
+			<name>Fabio Grucci</name>
+			<email>fabio.grucci[ at ]gmail.com</email>
+			<roles>
+				<role>Project owner</role>
+				<role>Main contributor</role>
+			</roles>
+		</developer>
+	</developers>
+
+</project>

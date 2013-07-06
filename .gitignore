@@ -1,6 +1,21 @@
 *.class
 
+# All dotfiles #
+.*
+!.gitignore
+
 # Package Files #
 *.jar
 *.war
 *.ear
+
+# Maven #
+/target/
+
+# Eclipse #
+# covered by [all dotfiles] #
+
+# IntelliJ #
+/*.iml
+/*.ipr
+/*.iws
