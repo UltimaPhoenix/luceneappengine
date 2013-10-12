@@ -261,22 +261,6 @@
 		<googlecode.username>fabio.grucci</googlecode.username>
 	</properties>
 	<distributionManagement>
-		<repository>
-			<!-- <id>lucene-appengine</id> -->
-			<id>nexus-local</id>
-			<name>Maven Repository for LAE Releases</name>
-			<!-- <url>scm:hg:https://repo.${googlecode.host}/hg/releases</url> -->
-			<url>http://localhost:8081/nexus/content/repositories/releases</url>
-			<uniqueVersion>true</uniqueVersion>
-		</repository>
-		<snapshotRepository>
-			<!-- <id>lucene-appengine</id> -->
-			<id>nexus-local</id>
-			<name>Maven Repository for LAE Snapshots</name>
-			<!-- <url>scm:hg:https://repo.${googlecode.host}/hg/snapshots</url> -->
-			<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
-		</snapshotRepository>
 		<site>
 			<id>lucene-appengine</id>
 			<url>scm:hg:https://maven-site.${googlecode.host}/hg</url>
@@ -367,8 +351,8 @@
 	</scm>
 
 	<issueManagement>
-		<system>Google Code</system>
-		<url>http://code.google.com/p/${googlecode.project}/issues</url>
+		<url>https://github.com/${github.username}/${repository.project.name}/issues</url>
+		<system>GitHub Issues</system>
 	</issueManagement>
 
 	<licenses>
