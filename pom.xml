@@ -7,12 +7,6 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
-
 	<name>${gae.application.name}</name>
 	<url>http://${googlecode.host}</url>
 	<description>A Lucene directory for Google App Engine.</description>
@@ -92,12 +86,26 @@
 			</extension>
 			<extension>
 				<groupId>org.apache.maven.scm</groupId>
-				<artifactId>maven-scm-provider-hg</artifactId>
+				<artifactId>maven-scm-provider-gitexe</artifactId>
 				<version>${wagon.scm.provider.version}</version>
 			</extension>
 		</extensions>
 
 		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
@@ -134,12 +142,17 @@
 					</dependency>
 					<dependency>
 						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-api</artifactId>
+						<version>${wagon.scm.provider.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
 						<artifactId>maven-scm-manager-plexus</artifactId>
 						<version>${wagon.scm.provider.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.maven.scm</groupId>
-						<artifactId>maven-scm-provider-hg</artifactId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
 						<version>${wagon.scm.provider.version}</version>
 					</dependency>
 				</dependencies>
@@ -157,8 +170,8 @@
 				</executions>
 				<configuration>
 					<links>
-						<link>http://lucene.apache.org/core/3_6_1/api/all</link>
-						<link>http://objectify-appengine.googlecode.com/svn/tags/3.1/javadoc</link>
+						<link>https://lucene.apache.org/core/4_7_0/core</link>
+						<link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
 					</links>
 					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
 				</configuration>
@@ -189,7 +202,7 @@
 					</dependency>
 					<dependency>
 						<groupId>org.apache.maven.scm</groupId>
-						<artifactId>maven-scm-provider-hg</artifactId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
 						<version>${wagon.scm.provider.version}</version>
 					</dependency>
 				</dependencies>
@@ -259,11 +272,20 @@
 		<github.username>UltimaPhoenix</github.username>
 		<bitbucket.username>Dark_Phoenix</bitbucket.username>
 		<googlecode.username>fabio.grucci</googlecode.username>
+        <gpg.keyname>fabio.grucci@gmail.com</gpg.keyname>
 	</properties>
 	<distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
 		<site>
 			<id>lucene-appengine</id>
-			<url>scm:hg:https://maven-site.${googlecode.host}/hg</url>
+			<url>scm:git:https://code.google.com/p/${googlecode.project}.maven-site</url>
 		</site>
 	</distributionManagement>
 
