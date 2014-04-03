@@ -4,11 +4,11 @@
 
 	<groupId>com.googlecode.luceneappengine</groupId>
 	<artifactId>luceneappengine</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
 	<name>${gae.application.name}</name>
-	<url>http://${googlecode.host}</url>
+	<url>https://${googlecode.host}</url>
 	<description>A Lucene directory for Google App Engine.</description>
 
 	<mailingLists>
@@ -41,11 +41,11 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-resource-plugin</artifactId>
-					<version>2.5</version>
+					<version>2.6</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.16</version>
+					<version>2.17</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-source-plugin</artifactId>
@@ -163,7 +163,7 @@
 				</executions>
 				<configuration>
 					<links>
-						<link>https://lucene.apache.org/core/4_7_0/core</link>
+						<link>https://lucene.apache.org/core/4_7_1/core</link>
 						<link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
 					</links>
 					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
@@ -284,14 +284,17 @@
 	<distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
+            <name>Sonatype OSSRH Snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
+            <name>Sonatype OSSRH Releases</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
 		<site>
 			<id>lucene-appengine</id>
+            <name>Maven generated site</name>
 			<url>scm:git:https://code.google.com/p/${googlecode.project}.maven-site</url>
 		</site>
 	</distributionManagement>
@@ -335,7 +338,7 @@
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
-			<artifactId>junit-dep</artifactId>
+			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
@@ -377,7 +380,7 @@
 	    <connection>scm:git:git@github.com:${github.username}/${repository.project.name}.git</connection>
 	    <developerConnection>scm:git:git@github.com:${github.username}/${repository.project.name}.git</developerConnection>
 	    <url>git@github.com:${github.username}/${repository.project.name}.git</url>
-	  <tag>luceneappengine-1.0.2</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<issueManagement>
@@ -403,5 +406,20 @@
 			</roles>
 		</developer>
 	</developers>
-
+    
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <links>
+                        <link>https://lucene.apache.org/core/4_7_0/core</link>
+                        <link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
+                    </links>
+                    <excludePackageNames>org.apache.lucene.*</excludePackageNames>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+    
 </project>

@@ -1,6 +1,5 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.factory;
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
 import java.io.IOException;
@@ -21,7 +20,7 @@ import com.googlecode.luceneappengine.objectify.util.ObjectifyUtil;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyFactory;
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cache.PendingFutures;
 
@@ -60,11 +59,10 @@ public class GaeDirectory extends Directory {
 	private final Key<LuceneIndex> indexKey;
 	
 	static {
-		ObjectifyFactory instance = factory();
-		instance.register(com.googlecode.luceneappengine.GaeLock.class);
-		instance.register(com.googlecode.luceneappengine.LuceneIndex.class);
-		instance.register(com.googlecode.luceneappengine.Segment.class);
-		instance.register(com.googlecode.luceneappengine.SegmentHunk.class);
+		ObjectifyService.register(com.googlecode.luceneappengine.GaeLock.class);
+		ObjectifyService.register(com.googlecode.luceneappengine.LuceneIndex.class);
+		ObjectifyService.register(com.googlecode.luceneappengine.Segment.class);
+		ObjectifyService.register(com.googlecode.luceneappengine.SegmentHunk.class);
 	}
 	 
 	/**
@@ -255,7 +253,6 @@ public class GaeDirectory extends Directory {
 	 * Create a new segment with the specified name using the specified {@link Objectify}.
 	 * The {@link Segment} contains one empty {@link SegmentHunk}.
 	 * @param name The name of the segment to create
-	 * @param objectify The objectify to use
 	 * @return A new {@link Segment} with one {@link SegmentHunk} 
 	 */
 	protected Segment newSegment(String name) {
