@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.lucene.store.BaseDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexInput;
@@ -50,7 +51,7 @@ import com.googlecode.objectify.cache.PendingFutures;
  * @see GaeLuceneUtil
  * @see RamUsageEstimator
  */
-public class GaeDirectory extends Directory {
+public class GaeDirectory extends BaseDirectory {
 
 	private static final Logger log = LoggerFactory.getLogger(GaeDirectory.class);
 	
@@ -284,7 +285,7 @@ public class GaeDirectory extends Directory {
 	}
 
 	@Override
-	public void sync(Collection<String> arg0) throws IOException {
+	public void sync(Collection<String> names) throws IOException {
 		PendingFutures.completeAllPendingFutures();
 	}
 }
