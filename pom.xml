@@ -257,7 +257,7 @@
 		<license.includedArtifacts>lucene-core</license.includedArtifacts>
 
 		<objectify.version>4.1.1</objectify.version>
-		<lucene.version>4.6.1</lucene.version>
+		<lucene.version>4.6.0</lucene.version>
 
 		<slf4j.version>1.7.6</slf4j.version>
 		<logback.version>1.0.7</logback.version>
