@@ -53,10 +53,10 @@ final class GaeLockFactory extends LockFactory {
 		return new Lock() {
 			/*
 			 * (non-Javadoc)
-			 * @see org.apache.lucene.store.Lock#release()
+			 * @see org.apache.lucene.store.Lock#close()
 			 */
 			@Override
-			public void release() throws IOException {
+			public void close() throws IOException {
 				final Objectify ofy = ofy();
 				ofy().transactNew(3, new Work<Void>() {
 					@Override
