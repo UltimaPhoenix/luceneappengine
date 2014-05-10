@@ -18,6 +18,7 @@ package org.apache.lucene.util;
  */
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.PlatformManagedObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -115,7 +116,7 @@ public final class RamUsageEstimator {
    */
   private static final Map<Class<?>,Integer> primitiveSizes;
   static {
-    primitiveSizes = new IdentityHashMap<Class<?>,Integer>();
+    primitiveSizes = new IdentityHashMap<>();
     primitiveSizes.put(boolean.class, Integer.valueOf(NUM_BYTES_BOOLEAN));
     primitiveSizes.put(byte.class, Integer.valueOf(NUM_BYTES_BYTE));
     primitiveSizes.put(char.class, Integer.valueOf(NUM_BYTES_CHAR));
@@ -223,37 +224,19 @@ public final class RamUsageEstimator {
     // regardless of the architecture).
     int objectAlignment = 8;
     try {
-      final Class<?> beanClazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
-      // Try to get the diagnostic mxbean without calling {@link ManagementFactory#getPlatformMBeanServer()}
-      // which starts AWT thread (and shows junk in the dock) on a Mac:
-      Object hotSpotBean;
-      // Java 7+, HotSpot
-      try {
-        hotSpotBean = ManagementFactory.class
-          .getMethod("getPlatformMXBean", Class.class)
-          .invoke(null, beanClazz);
-      } catch (Exception e1) {
-        // Java 6, HotSpot
-        try {
-          Class<?> sunMF = Class.forName("sun.management.ManagementFactory");
-          hotSpotBean = sunMF.getMethod("getDiagnosticMXBean").invoke(null);
-        } catch (Exception e2) {
-          // Last resort option is an attempt to get it from ManagementFactory's server anyway (may start AWT).
-          hotSpotBean = ManagementFactory.newPlatformMXBeanProxy(
-              ManagementFactory.getPlatformMBeanServer(), 
-              "com.sun.management:type=HotSpotDiagnostic", beanClazz);
+        final Class<? extends PlatformManagedObject> beanClazz =
+          Class.forName("com.sun.management.HotSpotDiagnosticMXBean").asSubclass(PlatformManagedObject.class);
+        final Object hotSpotBean = ManagementFactory.getPlatformMXBean(beanClazz);
+        if (hotSpotBean != null) {
+          final Method getVMOptionMethod = beanClazz.getMethod("getVMOption", String.class);
+          final Object vmOption = getVMOptionMethod.invoke(hotSpotBean, "ObjectAlignmentInBytes");
+          objectAlignment = Integer.parseInt(
+              vmOption.getClass().getMethod("getValue").invoke(vmOption).toString()
+          );
+          supportedFeatures.add(JvmFeature.OBJECT_ALIGNMENT);
         }
-      }
-      if (hotSpotBean != null) {
-        final Method getVMOptionMethod = beanClazz.getMethod("getVMOption", String.class);
-        final Object vmOption = getVMOptionMethod.invoke(hotSpotBean, "ObjectAlignmentInBytes");
-        objectAlignment = Integer.parseInt(
-            vmOption.getClass().getMethod("getValue").invoke(vmOption).toString()
-        );
-        supportedFeatures.add(JvmFeature.OBJECT_ALIGNMENT);
-      }
     } catch (Exception e) {
-      // Ignore.
+        // Ignore.
     } catch (NoClassDefFoundError e) { /* GAE support */ }
 
     NUM_BYTES_OBJECT_ALIGNMENT = objectAlignment;
@@ -430,11 +413,11 @@ public final class RamUsageEstimator {
    */
   private static long measureObjectSize(Object root) {
     // Objects seen so far.
-    final IdentityHashSet<Object> seen = new IdentityHashSet<Object>();
+    final IdentityHashSet<Object> seen = new IdentityHashSet<>();
     // Class cache with reference Field and precalculated shallow size. 
-    final IdentityHashMap<Class<?>, ClassCache> classCache = new IdentityHashMap<Class<?>, ClassCache>();
+    final IdentityHashMap<Class<?>, ClassCache> classCache = new IdentityHashMap<>();
     // Stack of objects pending traversal. Recursion caused stack overflows. 
-    final ArrayList<Object> stack = new ArrayList<Object>();
+    final ArrayList<Object> stack = new ArrayList<>();
     stack.add(root);
 
     long totalSize = 0;
@@ -513,7 +496,7 @@ public final class RamUsageEstimator {
   private static ClassCache createCacheEntry(final Class<?> clazz) {
     ClassCache cachedInfo;
     long shallowInstanceSize = NUM_BYTES_OBJECT_HEADER;
-    final ArrayList<Field> referenceFields = new ArrayList<Field>(32);
+    final ArrayList<Field> referenceFields = new ArrayList<>(32);
     for (Class<?> c = clazz; c != null; c = c.getSuperclass()) {
       final Field[] fields = c.getDeclaredFields();
       for (final Field f : fields) {
