@@ -28,14 +28,14 @@ import com.googlecode.objectify.cache.PendingFutures;
 /**
  * Lucene {@link Directory} working in google app engine (GAE) environment.
  * Using this {@link Directory} you can create multiple indexes, each one identified by
- * a name specified in contructor {@link GaeDirectory#GaeDirectory(String)}, 
+ * a name specified in constructor {@link GaeDirectory#GaeDirectory(String)}, 
  * for details read constructor documentation.
  * <b>In order to open an index writer is highly recommended the usage of configuration provided by 
  * {@link GaeLuceneUtil#getIndexWriterConfig(org.apache.lucene.util.Version, org.apache.lucene.analysis.Analyzer)}</b>.
  * <pre>
  * {@code
  * GaeDirectory directory = new GaeDirectory();
- * IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(Version.LUCENE_36, analyzer);
+ * IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(Version.LUCENE_47, analyzer);
  * IndexWriter writer = new IndexWriter(directory, config);
  * }
  * </pre>
@@ -43,7 +43,7 @@ import com.googlecode.objectify.cache.PendingFutures;
  * <i>
  * If your application throws {@link NoClassDefFoundError} while using {@link GaeDirectory} 
  * in order to make it work, into your GAE web application, the modified {@link RamUsageEstimator} 
- * (<a href="http://lucene-appengine.googlecode.com/hg/src/main/java/org/apache/lucene/util/RamUsageEstimator.java">link to source</a>) 
+ * (<a href="http://luceneappengine.googlecode.com/hg/src/main/java/org/apache/lucene/util/RamUsageEstimator.java">link to source</a>) 
  * in a package named <code>org.apache.lucene.util</code>.
  * </i>
  * 

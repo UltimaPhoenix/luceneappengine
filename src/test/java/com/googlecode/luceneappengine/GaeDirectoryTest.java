@@ -26,8 +26,8 @@ import org.junit.Test;
 
 public class GaeDirectoryTest extends LocalDatastoreTest {
 
-    private final Analyzer analyzer = new SimpleAnalyzer(Version.LUCENE_43);
-	private final IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(Version.LUCENE_43, analyzer);
+    private final Analyzer analyzer = new SimpleAnalyzer(Version.LUCENE_47);
+	private final IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(Version.LUCENE_47, analyzer);
     
     @Before
     @Override
