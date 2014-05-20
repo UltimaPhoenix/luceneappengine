@@ -143,11 +143,11 @@ class SegmentIndexOutput extends IndexOutput {
     }
     private void save(final SegmentHunk hunk) {
         ofy().save().entity(hunk);
-        crc.update(hunk.bytes, lastFlushIndex, hunk.bytes.length - lastFlushIndex);
+        crc.update(hunk.bytes, lastFlushIndex, writer.position - lastFlushIndex);
         if (writer.position > hunk.bytes.length) {// TODO: remove when seek will be removed (probably with Lucene 5 release)
             crc.update(Arrays.copyOf(new byte[0], writer.position - hunk.bytes.length));// TODO: remove when seek will be removed (probably with Lucene 5 release)
         }// TODO: remove when seek will be removed (probably with Lucene 5 release)
-        lastFlushIndex = hunk.bytes.length;
+        lastFlushIndex = writer.position;
     }
 
 }
