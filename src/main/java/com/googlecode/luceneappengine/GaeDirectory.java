@@ -113,10 +113,10 @@ public class GaeDirectory extends BaseDirectory {
 	 * @throws IOException If an error occurs
 	 */
 	public void delete() throws IOException {
-		final Objectify objectify = ofy();
-		objectify.transactNew(3, new Work<Void>() {
+		ofy().transactNew(3, new Work<Void>() {
 			@Override
 			public Void run() {
+			    Objectify objectify = ofy();
 				for(String name : listAll())
 					deleteSegment(objectify, name);
 				objectify.delete().key(indexKey);
@@ -130,11 +130,10 @@ public class GaeDirectory extends BaseDirectory {
 	 * @param name The name of the segment
 	 */
 	protected void deleteSegment(final String name) {
-		final Objectify objectify = ofy();
-		objectify.transactNew(4, new Work<Void>() {
+		ofy().transactNew(4, new Work<Void>() {
 			@Override
 			public Void run() {
-				deleteSegment(objectify, name);
+				deleteSegment(ofy(), name);
 				return null;
 			}
 		});
@@ -173,7 +172,7 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public void close() throws IOException {
-		/* nothing to do */
+	    isOpen = false;
 		//TODO: refactor for caching. Doh! There's something to do!
 	}
 	/*
@@ -182,8 +181,8 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public IndexInput openInput(String name, IOContext context) throws IOException {
+	    ensureOpen();
 		try {
-			PendingFutures.completeAllPendingFutures();
 			return new SegmentIndexInput(ofy().load().key(newSegmentKey(name)).safe());
 		} catch (NotFoundException e) {
 			throw new IOException(name, e);
@@ -195,11 +194,11 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public IndexOutput createOutput(String name, IOContext context) throws IOException {
+	    ensureOpen();
 		final Objectify begin = ofy();
 		Segment segment = begin.load().key(newSegmentKey(name)).now();
 		if(segment == null) {
 			segment = newSegment(name);
-			PendingFutures.completeAllPendingFutures();
 		}
 		return new SegmentIndexOutput(segment);
 	}
