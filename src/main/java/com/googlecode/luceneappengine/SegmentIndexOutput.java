@@ -1,22 +1,19 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.luceneappengine.SegmentHunk.MAX_BYTES_LENGTH;
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import com.googlecode.objectify.cache.PendingFutures;
+import org.apache.lucene.store.IndexOutput;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.zip.CRC32;
 
-import org.apache.lucene.store.IndexOutput;
-import com.googlecode.objectify.cache.PendingFutures;
+import static com.googlecode.luceneappengine.SegmentHunk.MAX_BYTES_LENGTH;
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 class SegmentIndexOutput extends IndexOutput {
 
 	private final Segment segment;
 	
 	private long filePointer;
-	
-	private int hunkIndex;
 	
 	private int hunkPointer;
 	
@@ -73,35 +70,6 @@ class SegmentIndexOutput extends IndexOutput {
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.apache.lucene.store.IndexOutput#seek(long)
-	 */
-	@Override
-	public void seek(long pos) throws IOException {// TODO: remove when seek will be removed (probably with Lucene 5 release)
-		final int newHunkIndex = (int) (pos / MAX_BYTES_LENGTH);
-		if (newHunkIndex != hunkIndex) {
-			for (int i = hunkIndex + 1; i <= newHunkIndex; i++) {
-				SegmentHunk newHunk = segment.newHunk();
-				ofy().save().entity(newHunk);
-//				hunk = segment.getHunk(newHunkIndex);
-				if (i != hunkIndex) {
-				    crc.update(Arrays.copyOf(new byte[0], SegmentHunk.MAX_BYTES_LENGTH));
-//					hunk.bytes = new byte[SegmentHunk.MAX_BYTES_LENGTH];//useless thanks to LimitedByteArrayWriter
-					//save
-				} else {
-				    lastFlushIndex = 0;
-					hunk = segment.getHunk(newHunkIndex);
-					writer = new LimitedByteArrayWriter(hunk.bytes, SegmentHunk.MAX_BYTES_LENGTH);
-				}
-			}
-			hunkIndex = newHunkIndex;
-			segment.length = Math.max(segment.length, pos);
-		}
-		hunkPointer = (int) (pos%MAX_BYTES_LENGTH);
-		writer.seek(hunkPointer);
-		filePointer = pos;
-	}
-	/*
-	 * (non-Javadoc)
 	 * @see org.apache.lucene.store.DataOutput#writeByte(byte)
 	 */
 	@Override
@@ -115,7 +83,6 @@ class SegmentIndexOutput extends IndexOutput {
 			writer = new LimitedByteArrayWriter(hunk.bytes, MAX_BYTES_LENGTH);
 			hunkPointer = 0;
 			lastFlushIndex = 0;
-			hunkIndex++;
 		}
 		writer.write(b);
 		filePointer++;
@@ -144,9 +111,6 @@ class SegmentIndexOutput extends IndexOutput {
     private void save(final SegmentHunk hunk) {
         ofy().save().entity(hunk);
         crc.update(hunk.bytes, lastFlushIndex, writer.position - lastFlushIndex);
-        if (writer.position > hunk.bytes.length) {// TODO: remove when seek will be removed (probably with Lucene 5 release)
-            crc.update(Arrays.copyOf(new byte[0], writer.position - hunk.bytes.length));// TODO: remove when seek will be removed (probably with Lucene 5 release)
-        }// TODO: remove when seek will be removed (probably with Lucene 5 release)
         lastFlushIndex = writer.position;
     }
 

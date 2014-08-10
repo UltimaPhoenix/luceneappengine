@@ -17,11 +17,31 @@ class SegmentIndexInput extends IndexInput {
 	private int hunkPointer;
 
 	private int hunkIndex;
-
+	
 	public SegmentIndexInput(Segment segment) {
 		super(segment.name);
 		this.segment = segment;
 		this.hunk = segment.getHunk(0);
+	}
+	/**
+	 * Used by {@link #slice(String, long, long)}.
+	 * @param sliceParent parend {@link SegmentIndexInput}
+	 * @param description
+	 * @param offset
+	 */
+	private SegmentIndexInput(SegmentIndexInput sliceParent, String description, long offset) {
+		super(description);
+		this.segment = sliceParent.segment;
+		this.filePointer = offset;
+		
+		this.hunkIndex = (int) (offset / MAX_BYTES_LENGTH);
+		this.hunkPointer = (int) (offset % MAX_BYTES_LENGTH);
+		
+		if (sliceParent.hunkIndex == this.hunkIndex) {//avoid loading 2 times from persistence
+			this.hunk = sliceParent.hunk;
+		} else {
+			this.hunk = segment.getHunk(hunkIndex);
+		}
 	}
 	/*
 	 * (non-Javadoc)
@@ -84,5 +104,26 @@ class SegmentIndexInput extends IndexInput {
 		for (int i = 0; i < len && filePointer < segment.length; i++)
 			b[offset++] = this.readByte();
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.apache.lucene.store.IndexInput#slice(java.lang.String, long, long)
+	 */
+	@Override
+	public IndexInput slice(final String sliceDescription, final long offset, final long length) throws IOException {
+		return new SegmentIndexInput(this, sliceDescription, offset) {
+			@Override
+			public long getFilePointer() {
+				return super.getFilePointer() - offset;
+			}
+			@Override
+			public long length() {
+				return length;
+			}
+			@Override
+			public void seek(long pos) throws IOException {
+				super.seek(offset + pos);
+			}
+		};
+	}
+	
 }

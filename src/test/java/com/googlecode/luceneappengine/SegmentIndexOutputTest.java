@@ -44,6 +44,7 @@ public class SegmentIndexOutputTest extends LocalDatastoreTest {
     }
     
     @Test
+    @SuppressWarnings("deprecation")
     public void testGetChecksum_Flush() throws IOException {
         final String input1 = "Hello World!";
         final String input2 = "Hello World second string!";
@@ -78,39 +79,4 @@ public class SegmentIndexOutputTest extends LocalDatastoreTest {
         }
     }
         
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testSeek() throws IOException {
-        final String input1 = "Hello World!";
-        final String input2 = "Hello World second string!";
-        final String segmentName = "segments.gen";//main segment name
-        
-        try (Directory directory = new GaeDirectory()) {
-            try (IndexOutput createOutput = directory.createOutput(segmentName, null)) {
-                createOutput.writeBytes(input1.getBytes(), 0, input1.getBytes().length);
-                createOutput.flush();
-                CodecUtil.writeFooter(createOutput);
-                createOutput.flush();
-            }
-            
-            try (IndexOutput createOutput = directory.createOutput(segmentName, null)) {
-                createOutput.seek(input1.getBytes().length);
-                createOutput.writeBytes(input2.getBytes(), 0, input2.getBytes().length);
-                createOutput.flush();
-                CodecUtil.writeFooter(createOutput);
-                createOutput.flush();
-            }
-            
-            try (BufferedChecksumIndexInput bcii = new BufferedChecksumIndexInput(directory.openInput(segmentName, null))) {
-                bcii.readBytes(new byte[input1.getBytes().length], 0, input1.getBytes().length);
-                bcii.readBytes(new byte[input2.getBytes().length], 0, input2.getBytes().length);
-                try {
-                    CodecUtil.checkFooter(bcii);
-                } catch (CorruptIndexException e) {
-                    fail(e.getMessage());
-                }
-            }
-        }
-    }
-
 }

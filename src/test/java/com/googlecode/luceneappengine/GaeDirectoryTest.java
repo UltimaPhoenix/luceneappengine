@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 public class GaeDirectoryTest extends LocalDatastoreTest {
 
-    private static final Version LUCENE_TEST_VERSION = Version.LUCENE_48;
+    private static final Version LUCENE_TEST_VERSION = Version.LUCENE_4_9;
     
     @SuppressWarnings("resource")
     private static IndexWriterConfig config() {
