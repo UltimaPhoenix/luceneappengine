@@ -15,19 +15,38 @@ import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.util.Version;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(Theories.class)
 public class GaeDirectoryTest extends LocalDatastoreTest {
 
-    private static final Version LUCENE_TEST_VERSION = Version.LUCENE_4_9;
+	@DataPoints
+	@SuppressWarnings("deprecation")//try backward compatibility
+    public static final Version[] LUCENE_TEST_VERSIONS = new Version[] {
+		Version.LUCENE_4_0, Version.LUCENE_4_1, Version.LUCENE_4_1_0,
+		Version.LUCENE_4_2, Version.LUCENE_4_2_0, Version.LUCENE_4_2_1,
+		Version.LUCENE_4_3, Version.LUCENE_4_3_0, Version.LUCENE_4_3_1,
+		Version.LUCENE_4_4, Version.LUCENE_4_4_0,
+		Version.LUCENE_4_5, Version.LUCENE_4_5_0, Version.LUCENE_4_5_1,
+		Version.LUCENE_4_6, Version.LUCENE_4_6_0, Version.LUCENE_4_6_1,
+		Version.LUCENE_4_7, Version.LUCENE_4_7_0, Version.LUCENE_4_7_1, Version.LUCENE_4_7_2,
+		Version.LUCENE_4_8, Version.LUCENE_4_8_0, Version.LUCENE_4_8_1, 
+		Version.LUCENE_4_9, Version.LUCENE_4_9_0, 
+		Version.LUCENE_CURRENT,
+		Version.LATEST
+	};
     
     @SuppressWarnings("resource")
-    private static IndexWriterConfig config() {
-        return GaeLuceneUtil.getIndexWriterConfig(LUCENE_TEST_VERSION, new SimpleAnalyzer(LUCENE_TEST_VERSION));
+    private static IndexWriterConfig config(Version luceneVersion) {
+        return GaeLuceneUtil.getIndexWriterConfig(luceneVersion, new SimpleAnalyzer());
     }
 
     @Test
@@ -72,13 +91,13 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         }
     }
     
-    @Test
-    public void writeAndReadDocumentInDirectory() throws IOException {
+    @Theory
+    public void writeAndReadDocumentInDirectory(Version luceneVersion) throws IOException {
         final String input = "Hello World!";
         
         try (Directory directory = new GaeDirectory()) {
             
-            try (IndexWriter writer = new IndexWriter(directory, config())) {
+            try (IndexWriter writer = new IndexWriter(directory, config(luceneVersion))) {
                 Document document = new Document();
                 document.add(new Field("title", input, TextField.TYPE_STORED));
                 writer.addDocument(document);
@@ -91,20 +110,20 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         }
     }
     
-    @Test
-    public void writeAndReadMoreDocumentInDirectory() throws IOException {
+    @Theory
+    public void writeAndReadMoreDocumentInDirectory(Version luceneVersion) throws IOException {
         final String input1 = "Hello World!";
         final String input2 = "Hello World!";
         
         try (Directory directory = new GaeDirectory()) {
             
-            try (IndexWriter writer = new IndexWriter(directory, config())) {
+            try (IndexWriter writer = new IndexWriter(directory, config(luceneVersion))) {
                 Document document = new Document();
                 document.add(new Field("title", input1, TextField.TYPE_STORED));
                 writer.addDocument(document);
             }
             
-            try (IndexWriter writer = new IndexWriter(directory, config())) {
+            try (IndexWriter writer = new IndexWriter(directory, config(luceneVersion))) {
                 Document document = new Document();
                 document.add(new Field("title", input2, TextField.TYPE_STORED));
                 writer.addDocument(document);

@@ -35,7 +35,7 @@ import com.googlecode.objectify.cache.PendingFutures;
  * <pre>
  * {@code
  * GaeDirectory directory = new GaeDirectory();
- * IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(Version.LUCENE_48, analyzer);
+ * IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(Version.LUCENE_4_10_0, analyzer);
  * IndexWriter writer = new IndexWriter(directory, config);
  * }
  * </pre>
