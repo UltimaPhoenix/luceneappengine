@@ -1,26 +1,27 @@
 package com.googlecode.luceneappengine;
 
-import com.googlecode.objectify.annotation.Cache;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Unindex;
+
+import com.textquo.twist.annotations.Cached;
+import com.textquo.twist.annotations.Entity;
+import com.textquo.twist.annotations.Id;
+import com.textquo.twist.annotations.Unindexed;
 
 /**
  * Class representing a GAE store index.
  * 
  * @author Fabio Grucci (github: <i>UltimaPhoenix</i>, bitbucket: <i>Dark_Phoenix</i>, googlecode: <i>fabio.grucci</i>)
- *
+ * @author Kerby Martino
  */
 @Entity
-@Unindex
-@Cache
+@Unindexed
+@Cached
 public class LuceneIndex {
 
 	@Id
 	String name;
 	
 	@SuppressWarnings("unused")
-	private LuceneIndex() {/* objectify */}
+	private LuceneIndex() {}
 	
 	LuceneIndex(String name) {
 		this.name = name;

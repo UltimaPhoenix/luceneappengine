@@ -1,17 +1,17 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 import java.io.IOException;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Key;
+import com.textquo.twist.object.KeyStructure;
+import com.textquo.twist.types.Function;
 import org.apache.lucene.store.Lock;
 import org.apache.lucene.store.LockFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Work;
+import static com.textquo.twist.ObjectStoreService.store;
 
 /**
  * Class used as {@link LockFactory} for any {@link GaeDirectory}.
@@ -24,9 +24,9 @@ final class GaeLockFactory extends LockFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(GaeLockFactory.class);
 
-	private final Key<LuceneIndex> indexKey;
+	private final Key indexKey;
 
-	private GaeLockFactory(Key<LuceneIndex> indexKey) {
+	private GaeLockFactory(Key indexKey) {
 		this.indexKey = indexKey;
 	}
 
@@ -36,7 +36,7 @@ final class GaeLockFactory extends LockFactory {
 	 * @param indexKey
 	 * @return A {@link GaeLockFactory} for this index
 	 */
-	public static GaeLockFactory getInstance(Key<LuceneIndex> indexKey) {
+	public static GaeLockFactory getInstance(Key indexKey) {
 		return new GaeLockFactory(indexKey);
 	}
 
@@ -47,7 +47,8 @@ final class GaeLockFactory extends LockFactory {
 	 *         {@link GaeLockFactory}
 	 */
 	List<GaeLock> getLocks() {
-		return ofy().load().type(GaeLock.class).ancestor(indexKey).list();
+		// Ancestor query
+		return store().find(GaeLock.class, indexKey).asList().getList();
 	}
 
 	/*
@@ -66,14 +67,15 @@ final class GaeLockFactory extends LockFactory {
 			@Override
 			public void close() throws IOException {
 				try {
-					ofy().transactNew(3, new Work<Void>() {
+					store().transact(new Function<Object>() {
 						@Override
-						public Void run() {
-							final GaeLock gaeLock = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
+						public Object execute() {
+							final GaeLock gaeLock
+									= store().get(GaeLock.class, KeyStructure.createKey(indexKey, GaeLock.class, lockName));
 							if (gaeLock != null && gaeLock.locked) {
 								log.debug("Unlocking Lock '{}'.", lockName);
 								gaeLock.locked = false;
-								ofy().save().entity(gaeLock).now();
+								store().put(gaeLock);
 							} else {
 								log.warn("Tryng to release a non locked Lock '{}'.", lockName);
 							}
@@ -94,11 +96,12 @@ final class GaeLockFactory extends LockFactory {
 			@Override
 			public boolean obtain() throws IOException {
 				try {
-					return ofy().transactNew(new Work<Boolean>() {
+					return store().transact(new Function<Boolean>() {
 						@Override
-						public Boolean run() {
+						public Boolean execute() {
 							final boolean obtained;
-							GaeLock gaeLock = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
+							GaeLock gaeLock
+									= store().get(GaeLock.class, KeyStructure.createKey(indexKey, GaeLock.class, lockName));
 							if (gaeLock == null) {
 								log.trace("Creating new Lock '{}.{}'.", indexKey, lockName);
 								gaeLock = new GaeLock(indexKey, lockName);
@@ -109,11 +112,10 @@ final class GaeLockFactory extends LockFactory {
 							} else {
 								log.debug("Locking Lock '{}.{}'.", indexKey, lockName);
 								gaeLock.locked = true;
-								ofy().save().entity(gaeLock).now();
+								store().put(gaeLock);
 								obtained = true;
 							}
-							return obtained;
-						}
+							return obtained;						}
 					});
 				} catch (RuntimeException e) {
 					log.error("Error obtaining lock:{} error:{}", lockName, e.getMessage(), e);
@@ -128,7 +130,8 @@ final class GaeLockFactory extends LockFactory {
 			 */
 			@Override
 			public boolean isLocked() throws IOException {
-				final GaeLock find = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
+				final GaeLock find = store()
+						.get(GaeLock.class, KeyStructure.createKey(indexKey, GaeLock.class, lockName));
 				return find != null && find.locked;
 			}
 		};
@@ -141,7 +144,7 @@ final class GaeLockFactory extends LockFactory {
 	 */
 	@Override
 	public void clearLock(String lockName) throws IOException {
-		ofy().delete().key(Key.create(GaeLock.class, lockName));
+		store().delete(KeyStructure.createKey(indexKey, GaeLock.class, lockName));
 	}
 
 }

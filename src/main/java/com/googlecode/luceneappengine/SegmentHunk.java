@@ -1,15 +1,14 @@
 package com.googlecode.luceneappengine;
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Cache;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindex;
+
+import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Key;
+import com.textquo.twist.annotations.*;
+import com.textquo.twist.annotations.Entity;
 
 @Entity
-@Unindex
-@Cache
+@Unindexed
+@Cached
 class SegmentHunk {
 	
 	public static final int MAX_BYTES_LENGTH = 1000 * 1000;
@@ -17,15 +16,15 @@ class SegmentHunk {
 	@Id
 	Long id;
 	
-	@Parent
-	Key<Segment> segment;
+	@Ancestor
+	Key segment;
 	
 	byte[] bytes;
 	
 	@SuppressWarnings("unused")
-	private SegmentHunk() {/* objectify */}
+	private SegmentHunk() {}
 	
-	SegmentHunk(Key<Segment> segment, Long id) {
+	SegmentHunk(Key segment, Long id) {
 		this.id = id;
 		this.segment = segment;
 		this.bytes = new byte[0];

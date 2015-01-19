@@ -1,12 +1,15 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Key;
+import com.textquo.twist.ObjectStore;
+import com.textquo.twist.common.ObjectNotFoundException;
+import com.textquo.twist.object.KeyStructure;
+import com.textquo.twist.types.Function;
 import org.apache.lucene.store.BaseDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
@@ -16,14 +19,10 @@ import org.apache.lucene.util.RamUsageEstimator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.luceneappengine.objectify.util.ObjectifyBuilder;
-import com.googlecode.luceneappengine.objectify.util.ObjectifyUtil;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.Work;
-import com.googlecode.objectify.cache.PendingFutures;
+import com.googlecode.luceneappengine.objectify.util.TwistBuilder;
+import com.googlecode.luceneappengine.objectify.util.TwistUtil;
+
+import static com.textquo.twist.ObjectStoreService.store;
 
 /**
  * Lucene {@link Directory} working in google app engine (GAE) environment.
@@ -56,13 +55,9 @@ public class GaeDirectory extends BaseDirectory {
 	
 	private static final String DEFAULT_GAE_LUCENE_INDEX_NAME = "defaultIndex";
 	
-	private final Key<LuceneIndex> indexKey;
+	private final Key indexKey;
 	
 	static {
-		ObjectifyService.register(com.googlecode.luceneappengine.GaeLock.class);
-		ObjectifyService.register(com.googlecode.luceneappengine.LuceneIndex.class);
-		ObjectifyService.register(com.googlecode.luceneappengine.Segment.class);
-		ObjectifyService.register(com.googlecode.luceneappengine.SegmentHunk.class);
 	}
 	 
 	/**
@@ -105,21 +100,22 @@ public class GaeDirectory extends BaseDirectory {
 	 * @return A list of available indexes
 	 */
 	public static List<LuceneIndex> getAvailableIndexes() {
-		return ofy().load().type(LuceneIndex.class).list();
+		return store().find(LuceneIndex.class).asList().getList();
 	}
 	/**
 	 * Delete this directory.
 	 * @throws IOException If an error occurs
 	 */
 	public void delete() throws IOException {
-		ofy().transactNew(3, new Work<Void>() {
+		store().transact(new Function<Void>() {
 			@Override
-			public Void run() {
-			    Objectify objectify = ofy();
-				for(String name : listAll())
-					deleteSegment(objectify, name);
-				objectify.delete().key(indexKey);
-				objectify.delete().entities(((GaeLockFactory) getLockFactory()).getLocks());
+			public Void execute() {
+				final ObjectStore objectStore = store();
+				for(String name : listAll()){
+					deleteSegment(objectStore, name);
+				}
+				objectStore.delete(indexKey);
+				objectStore.delete(((GaeLockFactory) getLockFactory()).getLocks());
 				return null;
 			}
 		});
@@ -129,26 +125,25 @@ public class GaeDirectory extends BaseDirectory {
 	 * @param name The name of the segment
 	 */
 	protected void deleteSegment(final String name) {
-		ofy().transactNew(4, new Work<Void>() {
+		store().transact(new Function<Object>() {
 			@Override
-			public Void run() {
-				deleteSegment(ofy(), name);
+			public Object execute() {
+				deleteSegment(store(), name);
 				return null;
 			}
 		});
 	}
 	/**
-	 * Delete the segment using the specified {@link Objectify} usefull for transaction.
-	 * @param objectify The {@link Objectify} to use
+	 * Delete the segment using the specified {@link ObjectStore} usefull for transaction.
+	 * @param store The {@link ObjectStore} to use
 	 * @param name The name of the segment to delete
 	 */
-	protected void deleteSegment(final Objectify objectify, final String name) {
-		final Key<Segment> segmentKey = newSegmentKey(name);
+	protected void deleteSegment(final ObjectStore store, final String name) {
+		final Key segmentKey = newSegmentKey(name);
 		
-		final Segment segment = objectify.load().key(segmentKey).now();
-		
-		objectify.delete().keys(segment.getHunkKeys(segmentKey));
-		objectify.delete().key(segmentKey);
+		final Segment segment = store.get(Segment.class, segmentKey);
+		store.delete(segment.getHunkKeys(segmentKey));
+		store.delete(segmentKey);
 	}
 	
 	/**
@@ -158,8 +153,8 @@ public class GaeDirectory extends BaseDirectory {
 	 * @param index The index of the hunk to print
 	 */
 	protected void logSegment(Segment segment, String name, int index) {
-		Objectify objectify = ofy();
-		final SegmentHunk hunk = objectify.load().key(newSegmentHunkKey(name, index)).now();
+		ObjectStore objectStore = store();
+		final SegmentHunk hunk =  objectStore.get(SegmentHunk.class, newSegmentHunkKey(name, index));
 		byte[] content = Arrays.copyOfRange(hunk.bytes, 0, (int) (hunk.bytes.length % (segment.length / hunk.id)));
 		hunk.bytes = content;
 		log.info("Hunk '{}-{}-{}' with length {}, Value={}", 
@@ -182,8 +177,8 @@ public class GaeDirectory extends BaseDirectory {
 	public IndexInput openInput(String name, IOContext context) throws IOException {
 	    ensureOpen();
 		try {
-			return new SegmentIndexInput(ofy().load().key(newSegmentKey(name)).safe());
-		} catch (NotFoundException e) {
+			return new SegmentIndexInput(store().get(Segment.class, newSegmentKey(name)));
+		} catch (ObjectNotFoundException e) {
 			throw new IOException(name, e);
 		}
 	}
@@ -194,8 +189,8 @@ public class GaeDirectory extends BaseDirectory {
 	@Override
 	public IndexOutput createOutput(String name, IOContext context) throws IOException {
 	    ensureOpen();
-		final Objectify begin = ofy();
-		Segment segment = begin.load().key(newSegmentKey(name)).now();
+		ObjectStore objectStore = store();
+		Segment segment = objectStore.get(Segment.class, newSegmentKey(name));
 		if(segment == null) {
 			segment = newSegment(name);
 		}
@@ -207,14 +202,14 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public void deleteFile(String name) throws IOException {
-		final Objectify objectify = ofy();
-		final Segment segment = objectify.load().key(newSegmentKey(name)).now();
+		ObjectStore objectStore = store();
+		Segment segment = objectStore.get(Segment.class, newSegmentKey(name));
 		
 		final long hunkCount = segment.hunkCount;
 		for (int i = 1; i <= hunkCount; i++) {
-			objectify.delete().key(newSegmentHunkKey(name, i));
+			objectStore.delete(newSegmentHunkKey(name, i));
 		}
-		objectify.delete().key(newSegmentKey(name));
+		objectStore.delete(newSegmentKey(name));
 	}
 	/*
 	 * (non-Javadoc)
@@ -222,7 +217,7 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public boolean fileExists(String name) throws IOException {
-		final Segment bigTableIndexFile = ofy().load().key(newSegmentKey(name)).now();
+		final Segment bigTableIndexFile =  store().get(Segment.class, newSegmentKey(name));
 		return bigTableIndexFile != null;
 	}
 	/*
@@ -231,7 +226,7 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public long fileLength(String name) throws IOException {
-		final Segment bigTableIndexFile = ofy().load().key(newSegmentKey(name)).now();
+		final Segment bigTableIndexFile =  store().get(Segment.class, newSegmentKey(name));
 		return bigTableIndexFile.length;
 	}
 	/*
@@ -240,16 +235,16 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public String[] listAll() {
-		final Objectify objectify = ofy();
-		final List<Key<Segment>> keys = objectify.load().type(Segment.class).ancestor(indexKey).keys().list();
+		ObjectStore objectStore = store();
+		final List<Key> keys = store().find(Segment.class, indexKey).keysOnly().asList().getList();
 		String[] names = new String[keys.size()];
 		int i = 0;
-		for (Key<Segment> name : keys)
+		for (Key name : keys)
 			names[i++] = name.getName();
 		return names;
 	}
 	/**
-	 * Create a new segment with the specified name using the specified {@link Objectify}.
+	 * Create a new segment with the specified name using the specified {@link com.textquo.twist.ObjectStore}.
 	 * The {@link Segment} contains one empty {@link SegmentHunk}.
 	 * @param name The name of the segment to create
 	 * @return A new {@link Segment} with one {@link SegmentHunk} 
@@ -258,32 +253,32 @@ public class GaeDirectory extends BaseDirectory {
 		Segment segment = new Segment(indexKey, name);
 		SegmentHunk newHunk = segment.newHunk();//at least one segment
 		segment.lastModified = System.currentTimeMillis();
-		ofy().save().entities(segment, newHunk).now();
+		store().put(segment, newHunk);
 		log.debug("Created segment '{}'.", name);
 		return segment;
 	}
 	
-	private Key<SegmentHunk> newSegmentHunkKey(final String name, long count) {
-		return Key.create(newSegmentKey(name), SegmentHunk.class, count);
+	private Key newSegmentHunkKey(final String name, long count) {
+		return KeyStructure.createKey(newSegmentKey(name), SegmentHunk.class, count);
 	}
-	private Key<Segment> newSegmentKey(final String name) {
-		return Key.create(indexKey, Segment.class, name);
+	private Key newSegmentKey(final String name) {
+		return KeyStructure.createKey(indexKey, Segment.class, name);
 	}
-	private static Key<LuceneIndex> createIndexIfNotExist(String indexName) {
-		Key<LuceneIndex> key = Key.create(LuceneIndex.class, indexName);
-		ObjectifyUtil.getOrCreate(key, new LuceneIndexBuilder());
+	private static Key createIndexIfNotExist(String indexName) {
+		Key key = KeyStructure.createKey(LuceneIndex.class, indexName);
+		TwistUtil.getOrCreate(key, new LuceneIndexBuilder());
 		return key;
 	}
 	
-	private static class LuceneIndexBuilder implements ObjectifyBuilder<LuceneIndex>{
+	private static class LuceneIndexBuilder implements TwistBuilder<LuceneIndex> {
 		@Override
-		public LuceneIndex newIstance(Key<LuceneIndex> key) {
+		public LuceneIndex newIstance(Key key) {
 			return new LuceneIndex(key.getName());
 		}
 	}
 
 	@Override
 	public void sync(Collection<String> names) throws IOException {
-		PendingFutures.completeAllPendingFutures();
+		//PendingFutures.completeAllPendingFutures();
 	}
 }

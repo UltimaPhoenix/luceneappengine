@@ -1,7 +1,5 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.junit.After;
@@ -14,7 +12,7 @@ public abstract class LocalDatastoreTest {
     @Before
     public void setUp() {
         helper.setUp();
-        ofy().clear();
+        //ofy().clear();
     }
 
     @After

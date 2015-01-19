@@ -1,12 +1,8 @@
 package com.googlecode.luceneappengine;
 
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Cache;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindex;
+import com.google.appengine.api.datastore.Key;
+import com.textquo.twist.annotations.*;
 
 /**
  * Class representing a lock used during indexing operations.
@@ -16,12 +12,12 @@ import com.googlecode.objectify.annotation.Unindex;
  *
  */
 @Entity
-@Unindex
-@Cache
+@Unindexed
+@Cached
 class GaeLock {
 
-	@Parent
-	Key<LuceneIndex> indexKey;
+	@Ancestor
+	Key indexKey;
 	
 	@Id
 	String name;
@@ -31,7 +27,7 @@ class GaeLock {
 	@SuppressWarnings("unused")
 	private GaeLock() {/* objectify */}
 	
-	public GaeLock(Key<LuceneIndex> indexKey, String name) {
+	public GaeLock(Key indexKey, String name) {
 		this.indexKey = indexKey;
 		this.name = name;
 	}

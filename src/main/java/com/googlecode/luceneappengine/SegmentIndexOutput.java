@@ -1,13 +1,12 @@
 package com.googlecode.luceneappengine;
 
-import com.googlecode.objectify.cache.PendingFutures;
 import org.apache.lucene.store.IndexOutput;
 
 import java.io.IOException;
 import java.util.zip.CRC32;
 
 import static com.googlecode.luceneappengine.SegmentHunk.MAX_BYTES_LENGTH;
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import static com.textquo.twist.ObjectStoreService.store;
 
 class SegmentIndexOutput extends IndexOutput {
 
@@ -47,9 +46,9 @@ class SegmentIndexOutput extends IndexOutput {
 	    segment.lastModified = System.currentTimeMillis();
 		writer.flush();
 		hunk.bytes = writer.getBytes();
-		ofy().save().entity(segment);
+		store().put(segment);
 		save(hunk);
-		PendingFutures.completeAllPendingFutures();
+		//PendingFutures.completeAllPendingFutures();
 		/* nothing to do */
 	}
 	/*
@@ -109,7 +108,7 @@ class SegmentIndexOutput extends IndexOutput {
         return crc.getValue();
     }
     private void save(final SegmentHunk hunk) {
-        ofy().save().entity(hunk);
+		store().put(hunk);
         crc.update(hunk.bytes, lastFlushIndex, writer.position - lastFlushIndex);
         lastFlushIndex = writer.position;
     }

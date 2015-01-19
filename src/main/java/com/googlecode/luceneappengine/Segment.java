@@ -1,29 +1,26 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Key;
+import com.textquo.twist.annotations.*;
+import com.textquo.twist.object.KeyStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Cache;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindex;
+import static com.textquo.twist.ObjectStoreService.store;
+
 
 @Entity
-@Unindex
-@Cache
+@Unindexed
+@Cached
 class Segment {
 	
 	private static final Logger log = LoggerFactory.getLogger(Segment.class);
 	
-	@Parent
-	Key<LuceneIndex> index;
+	@Ancestor
+	Key index;
 	
 	@Id
 	String name;
@@ -37,13 +34,13 @@ class Segment {
 	@SuppressWarnings("unused")
 	private Segment() {/* objectify */}
 	
-	public Segment(Key<LuceneIndex> index, String name) {
+	public Segment(Key index, String name) {
 		this.name = name;
 		this.index = index;
 	}
 	
 	public SegmentHunk getHunk(int index) {//GAE id cannotstart from zero
-		return ofy().load().key(buildSegmentHunkKey(index)).now();
+		return store().get(SegmentHunk.class, buildSegmentHunkKey(index));
 	}
 	
 	public SegmentHunk newHunk() {
@@ -54,19 +51,19 @@ class Segment {
 		return newHunk;
 	}
 	
-	List<Key<SegmentHunk>> getHunkKeys(Key<Segment> currentKey) {
-		List<Key<SegmentHunk>> hunkKeys = new ArrayList<Key<SegmentHunk>>((int) hunkCount);
+	List<Key> getHunkKeys(Key currentSegmentKey) {
+		List<Key> hunkKeys = new ArrayList<Key>((int) hunkCount);
 		for (int i = 0; i < hunkCount; i++) {
-			hunkKeys.add(Key.create(currentKey, SegmentHunk.class, i + 1));
+			hunkKeys.add(KeyStructure.createKey(currentSegmentKey, SegmentHunk.class, i + 1));
 		}
 		return hunkKeys;
 	}
 	
-	private Key<SegmentHunk> buildSegmentHunkKey(int index) {
-		return Key.create(getKey(), SegmentHunk.class, index + 1);
+	private Key buildSegmentHunkKey(int index) {
+		return KeyStructure.createKey(this.getKey(), SegmentHunk.class, index + 1);
 	}
-	private Key<Segment> getKey() {
-		return Key.create(index, Segment.class, name);
+	private Key getKey() {
+		return KeyStructure.createKey(index, Segment.class, name);
 	}
 	
 	@Override
