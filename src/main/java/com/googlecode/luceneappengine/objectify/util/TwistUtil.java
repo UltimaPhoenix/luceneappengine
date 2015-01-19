@@ -15,10 +15,9 @@ import static com.textquo.twist.ObjectStoreService.store;
 public enum TwistUtil {
 	;
 
-	public static <T> T getOrCreate(final Key key, final TwistBuilder<T> builder) {
+	public static <T> T getOrCreate(Class<T> clazz, final Key key, final TwistBuilder<T> builder) {
 		final ObjectStore objectStore = store();
-		T t = null;
-		t = (T) objectStore.get(t.getClass(), key);
+		T t = objectStore.get(clazz, key);
 		if(t == null) {
 			store().transact(new Function<T>() {
 				@Override

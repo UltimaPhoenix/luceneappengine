@@ -15,8 +15,8 @@ class SegmentHunk {
 	
 	@Id
 	Long id;
-	
-	@Ancestor
+
+	@Parent
 	Key segment;
 	
 	byte[] bytes;

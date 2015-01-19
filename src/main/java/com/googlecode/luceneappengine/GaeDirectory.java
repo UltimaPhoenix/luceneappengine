@@ -266,7 +266,7 @@ public class GaeDirectory extends BaseDirectory {
 	}
 	private static Key createIndexIfNotExist(String indexName) {
 		Key key = KeyStructure.createKey(LuceneIndex.class, indexName);
-		TwistUtil.getOrCreate(key, new LuceneIndexBuilder());
+		TwistUtil.getOrCreate(LuceneIndex.class, key, new LuceneIndexBuilder());
 		return key;
 	}
 	

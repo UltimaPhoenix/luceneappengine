@@ -19,7 +19,7 @@ class Segment {
 	
 	private static final Logger log = LoggerFactory.getLogger(Segment.class);
 	
-	@Ancestor
+	@Parent
 	Key index;
 	
 	@Id
