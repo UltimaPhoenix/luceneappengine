@@ -39,7 +39,6 @@ import com.googlecode.objectify.cache.PendingFutures;
  * IndexWriter writer = new IndexWriter(directory, config);
  * }
  * </pre>
- * <br />
  * <i>
  * If your application throws {@link NoClassDefFoundError} while using {@link GaeDirectory} 
  * in order to make it work, into your GAE web application, the modified {@link RamUsageEstimator} 

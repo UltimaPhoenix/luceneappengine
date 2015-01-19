@@ -204,20 +204,20 @@
 					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-gpg-plugin</artifactId>-->
+                <!--<version>1.5</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>sign-artifacts</id>-->
+                        <!--<phase>verify</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>sign</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
 			<plugin>
 				<!-- explicitly define maven-deploy-plugin after other to force exec 
 					order -->
@@ -304,7 +304,7 @@
 		<github.username>UltimaPhoenix</github.username>
 		<bitbucket.username>Dark_Phoenix</bitbucket.username>
 		<googlecode.username>fabio.grucci</googlecode.username>
-        <gpg.keyname>fabio.grucci@gmail.com</gpg.keyname>
+        <!--<gpg.keyname>fabio.grucci@gmail.com</gpg.keyname>-->
 	</properties>
 	<distributionManagement>
         <snapshotRepository>
