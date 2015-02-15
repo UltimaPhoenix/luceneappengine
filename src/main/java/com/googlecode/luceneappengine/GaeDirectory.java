@@ -177,7 +177,7 @@ public class GaeDirectory extends BaseDirectory {
 	public IndexInput openInput(String name, IOContext context) throws IOException {
 	    ensureOpen();
 		try {
-			return new SegmentIndexInput(store().get(Segment.class, newSegmentKey(name)));
+			return new SegmentIndexInput(store().safeGet(Segment.class, newSegmentKey(name)));
 		} catch (ObjectNotFoundException e) {
 			throw new IOException(name, e);
 		}
@@ -236,11 +236,11 @@ public class GaeDirectory extends BaseDirectory {
 	@Override
 	public String[] listAll() {
 		ObjectStore objectStore = store();
-		final List<Key> keys = store().find(Segment.class, indexKey).keysOnly().asList().getList();
+		final List<Segment> keys = store().find(Segment.class, indexKey).asList().getList();//TODO: keysOnly() method not working
 		String[] names = new String[keys.size()];
 		int i = 0;
-		for (Key name : keys)
-			names[i++] = name.getName();
+		for (Segment name : keys)
+			names[i++] = name.getKey().getName();
 		return names;
 	}
 	/**

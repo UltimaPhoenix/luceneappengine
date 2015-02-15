@@ -15,7 +15,7 @@ import static com.textquo.twist.ObjectStoreService.store;
 @Entity
 @Unindexed
 @Cached
-class Segment {
+public class Segment {
 	
 	private static final Logger log = LoggerFactory.getLogger(Segment.class);
 	
@@ -32,7 +32,7 @@ class Segment {
 	long hunkCount;
 
 	@SuppressWarnings("unused")
-	private Segment() {/* objectify */}
+	public Segment() {/* twist */}
 	
 	public Segment(Key index, String name) {
 		this.name = name;
@@ -62,7 +62,7 @@ class Segment {
 	private Key buildSegmentHunkKey(int index) {
 		return KeyStructure.createKey(this.getKey(), SegmentHunk.class, index + 1);
 	}
-	private Key getKey() {
+	Key getKey() {
 		return KeyStructure.createKey(index, Segment.class, name);
 	}
 	
