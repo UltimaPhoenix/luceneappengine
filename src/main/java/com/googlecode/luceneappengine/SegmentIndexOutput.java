@@ -26,6 +26,7 @@ class SegmentIndexOutput extends IndexOutput {
 	private int lastFlushIndex;
 	
 	public SegmentIndexOutput(Segment segment) {
+		super(segment.name);
 		this.segment = segment;
 		this.hunk = segment.getHunk(0);
 		this.writer = new LimitedByteArrayWriter(hunk.bytes, SegmentHunk.MAX_BYTES_LENGTH);
@@ -38,17 +39,13 @@ class SegmentIndexOutput extends IndexOutput {
 	public void close() throws IOException {
 	    flush();
 	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.lucene.store.IndexOutput#flush()
-	 */
-	@Override
 	public void flush() throws IOException {
 	    segment.lastModified = System.currentTimeMillis();
 		writer.flush();
 		hunk.bytes = writer.getBytes();
 		ofy().save().entity(segment);
 		save(hunk);
+		ofy().flush();
 		PendingFutures.completeAllPendingFutures();
 		/* nothing to do */
 	}
@@ -59,14 +56,6 @@ class SegmentIndexOutput extends IndexOutput {
 	@Override
 	public long getFilePointer() {
 		return filePointer;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.lucene.store.IndexOutput#length()
-	 */
-	@Override
-	public long length() throws IOException {
-		return segment.length;
 	}
 	/*
 	 * (non-Javadoc)

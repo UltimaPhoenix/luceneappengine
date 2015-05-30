@@ -53,18 +53,18 @@ public class SegmentIndexOutputTest extends LocalDatastoreTest {
         try (Directory directory = new GaeDirectory()) {
             try (IndexOutput createOutput = directory.createOutput(segmentName, null)) {
                 createOutput.writeBytes(input1.getBytes(), 0, input1.getBytes().length);
-                createOutput.flush();
+//                createOutput.flush();
                 CodecUtil.writeFooter(createOutput);
-                createOutput.flush();
+//                createOutput.flush();
             }
             
             try (IndexOutput createOutput = directory.createOutput(segmentName, null)) {
                 createOutput.writeBytes(input2.getBytes(), 0, input2.getBytes().length);
-                createOutput.flush();
+//                createOutput.flush();
                 createOutput.writeBytes(input2.getBytes(), 0, input2.getBytes().length);
-                createOutput.flush();
+//                createOutput.flush();
                 CodecUtil.writeFooter(createOutput);
-                createOutput.flush();
+//                createOutput.flush();
             }
             
             try (BufferedChecksumIndexInput bcii = new BufferedChecksumIndexInput(directory.openInput(segmentName, null))) {

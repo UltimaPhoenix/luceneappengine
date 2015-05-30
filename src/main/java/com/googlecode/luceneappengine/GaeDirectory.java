@@ -22,6 +22,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.TxnType;
 import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cache.PendingFutures;
 
@@ -57,7 +58,7 @@ public class GaeDirectory extends BaseDirectory {
 	
 	private static final String DEFAULT_GAE_LUCENE_INDEX_NAME = "defaultIndex";
 	
-	private final Key<LuceneIndex> indexKey;
+	final Key<LuceneIndex> indexKey;
 	
 	static {
 		ObjectifyService.register(com.googlecode.luceneappengine.GaeLock.class);
@@ -79,17 +80,11 @@ public class GaeDirectory extends BaseDirectory {
 	 * @param indexName The name of the index
 	 */
 	public GaeDirectory(String indexName) {
+		super(GaeLockFactory.getInstance());
 		if(indexName == null) {
 			indexName = DEFAULT_GAE_LUCENE_INDEX_NAME;
 		}
 		this.indexKey = createIndexIfNotExist(indexName);
-		try {
-			setLockFactory(GaeLockFactory.getInstance(indexKey));
-		} catch (IOException e) {
-			// Cannot happen.
-			log.error("Unhandled Exception please report this stack trace to code mantainer, " +
-					"this index can be corrupted with concurrent indexing operations.", e);
-		}
 	}
 	/**
 	 * Create a {@link GaeDirectory} for existing index.
@@ -120,7 +115,7 @@ public class GaeDirectory extends BaseDirectory {
 				for(String name : listAll())
 					deleteSegment(objectify, name);
 				objectify.delete().key(indexKey);
-				objectify.delete().entities(((GaeLockFactory) getLockFactory()).getLocks());
+				objectify.delete().entities(((GaeLockFactory)lockFactory).getLocks(GaeDirectory.this));
 				return null;
 			}
 		});
@@ -207,7 +202,7 @@ public class GaeDirectory extends BaseDirectory {
 	 * @see org.apache.lucene.store.Directory#deleteFile(java.lang.String)
 	 */
 	@Override
-	public void deleteFile(String name) throws IOException {
+	public void deleteFile(String name) {
 		final Objectify objectify = ofy();
 		final Segment segment = objectify.load().key(newSegmentKey(name)).now();
 		
@@ -217,14 +212,28 @@ public class GaeDirectory extends BaseDirectory {
 		}
 		objectify.delete().key(newSegmentKey(name));
 	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.lucene.store.Directory#fileExists(java.lang.String)
-	 */
 	@Override
-	public boolean fileExists(String name) throws IOException {
-		final Segment bigTableIndexFile = ofy().load().key(newSegmentKey(name)).now();
-		return bigTableIndexFile != null;
+	public void renameFile(final String source, final String dest) throws IOException {
+		ofy().execute(TxnType.REQUIRES_NEW, new Work<Void>() {
+			@Override
+			public Void run() {
+				Segment sourceSegment = ofy().load().key(newSegmentKey(source)).now();
+				
+				Segment destSegment = copySegment(sourceSegment);
+				destSegment.name = dest;
+				Key<Segment> destSegmentKey = ofy().save().entity(destSegment).now();
+				
+				final long hunkCount = sourceSegment.hunkCount;
+				for (int i = 0; i < hunkCount; i++) {
+					SegmentHunk hunk = sourceSegment.getHunk(i);
+					SegmentHunk destHunk = copySegmentHunk(hunk);
+					destHunk.segment = destSegmentKey;
+					ofy().save().entity(destHunk);
+				}
+				deleteFile(source);
+				return null;
+			}
+		});
 	}
 	/*
 	 * (non-Javadoc)
@@ -287,4 +296,18 @@ public class GaeDirectory extends BaseDirectory {
 	public void sync(Collection<String> names) throws IOException {
 		PendingFutures.completeAllPendingFutures();
 	}
+	
+	private Segment copySegment(Segment sourceSegment) {
+		Segment copy = new Segment(indexKey, sourceSegment.name);
+		copy.lastModified = System.currentTimeMillis();
+		copy.length = sourceSegment.length;
+		copy.hunkCount = sourceSegment.hunkCount;
+		return copy;
+	}
+	private SegmentHunk copySegmentHunk(SegmentHunk hunk) {
+		SegmentHunk copy = new SegmentHunk(hunk.segment, hunk.id);
+		copy.bytes = hunk.bytes;
+		return copy;
+	}
+	
 }

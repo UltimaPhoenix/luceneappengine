@@ -16,13 +16,12 @@ public final class GaeLuceneUtil {
 	/**
 	 * Method that return {@link IndexWriterConfig} properly configured in order to 
 	 * work in google app engine environment.
-	 * @param version The lucene version
 	 * @param analyzer The analyzer to use
 	 * @return An {@link IndexWriterConfig} properly configured
 	 */
 	@SuppressWarnings("resource")//SerialMergeSceduler is Closable
-	public static IndexWriterConfig getIndexWriterConfig(Version version, Analyzer analyzer) {
-		final IndexWriterConfig config = new IndexWriterConfig(version, analyzer);
+	public static IndexWriterConfig getIndexWriterConfig(Analyzer analyzer) {
+		final IndexWriterConfig config = new IndexWriterConfig(analyzer);
 		config.setMergeScheduler(new SerialMergeScheduler());
 		return config;
 	}

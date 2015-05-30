@@ -5,6 +5,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.Lock;
 import org.apache.lucene.store.LockFactory;
 import org.slf4j.Logger;
@@ -24,11 +25,7 @@ final class GaeLockFactory extends LockFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(GaeLockFactory.class);
 
-	private final Key<LuceneIndex> indexKey;
-
-	private GaeLockFactory(Key<LuceneIndex> indexKey) {
-		this.indexKey = indexKey;
-	}
+	private GaeLockFactory() {/* singleton */}
 
 	/**
 	 * Return a new {@link GaeLockFactory} specific for the index.
@@ -36,18 +33,12 @@ final class GaeLockFactory extends LockFactory {
 	 * @param indexKey
 	 * @return A {@link GaeLockFactory} for this index
 	 */
-	public static GaeLockFactory getInstance(Key<LuceneIndex> indexKey) {
-		return new GaeLockFactory(indexKey);
+	public static GaeLockFactory getInstance() {
+		return GaeLockFactoryHolder.INSTANCE;
 	}
-
-	/**
-	 * Method that return every lock created by this {@link GaeLockFactory}.
-	 * 
-	 * @return The list of {@link GaeLock} created by this
-	 *         {@link GaeLockFactory}
-	 */
-	List<GaeLock> getLocks() {
-		return ofy().load().type(GaeLock.class).ancestor(indexKey).list();
+	
+	private static class GaeLockFactoryHolder {
+		private static final GaeLockFactory INSTANCE = new GaeLockFactory();
 	}
 
 	/*
@@ -56,7 +47,11 @@ final class GaeLockFactory extends LockFactory {
 	 * @see org.apache.lucene.store.LockFactory#makeLock(java.lang.String)
 	 */
 	@Override
-	public Lock makeLock(final String lockName) {
+	public Lock makeLock(final Directory dir, final String lockName) {
+		if (!(dir instanceof GaeDirectory)) {
+	      throw new UnsupportedOperationException(getClass().getSimpleName() + " can only be used with GaeDirectory subclasses, got: " + dir);
+	    }
+		final Key<LuceneIndex> indexKey = ((GaeDirectory) dir).indexKey;
 		return new Lock() {
 			/*
 			 * (non-Javadoc)
@@ -134,14 +129,15 @@ final class GaeLockFactory extends LockFactory {
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Method that return every lock created by this {@link GaeLockFactory}.
 	 * 
-	 * @see org.apache.lucene.store.LockFactory#clearLock(java.lang.String)
+	 * @return The list of {@link GaeLock} created by this
+	 *         {@link GaeLockFactory}
 	 */
-	@Override
-	public void clearLock(String lockName) throws IOException {
-		ofy().delete().key(Key.create(GaeLock.class, lockName));
+	List<GaeLock> getLocks(GaeDirectory gaeDirectory) {
+		return ofy().load().type(GaeLock.class).ancestor(gaeDirectory.indexKey).list();
 	}
+
 
 }

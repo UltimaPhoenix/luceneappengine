@@ -40,13 +40,14 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
 		Version.LUCENE_4_7, Version.LUCENE_4_7_0, Version.LUCENE_4_7_1, Version.LUCENE_4_7_2,
 		Version.LUCENE_4_8, Version.LUCENE_4_8_0, Version.LUCENE_4_8_1, 
 		Version.LUCENE_4_9, Version.LUCENE_4_9_0, 
+		Version.LUCENE_4_10_0, Version.LUCENE_4_10_1, Version.LUCENE_4_10_2, Version.LUCENE_4_10_3,
 		Version.LUCENE_CURRENT,
+		Version.LUCENE_5_0_0,
 		Version.LATEST
 	};
     
-    @SuppressWarnings("resource")
-    private static IndexWriterConfig config(Version luceneVersion) {
-        return GaeLuceneUtil.getIndexWriterConfig(luceneVersion, new SimpleAnalyzer());
+    private static IndexWriterConfig config() {
+        return GaeLuceneUtil.getIndexWriterConfig(new SimpleAnalyzer());
     }
 
     @Test
@@ -97,7 +98,7 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         
         try (Directory directory = new GaeDirectory()) {
             
-            try (IndexWriter writer = new IndexWriter(directory, config(luceneVersion))) {
+            try (IndexWriter writer = new IndexWriter(directory, config())) {
                 Document document = new Document();
                 document.add(new Field("title", input, TextField.TYPE_STORED));
                 writer.addDocument(document);
@@ -117,13 +118,13 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         
         try (Directory directory = new GaeDirectory()) {
             
-            try (IndexWriter writer = new IndexWriter(directory, config(luceneVersion))) {
+            try (IndexWriter writer = new IndexWriter(directory, config())) {
                 Document document = new Document();
                 document.add(new Field("title", input1, TextField.TYPE_STORED));
                 writer.addDocument(document);
             }
             
-            try (IndexWriter writer = new IndexWriter(directory, config(luceneVersion))) {
+            try (IndexWriter writer = new IndexWriter(directory, config())) {
                 Document document = new Document();
                 document.add(new Field("title", input2, TextField.TYPE_STORED));
                 writer.addDocument(document);
