@@ -1,7 +1,16 @@
 package com.googlecode.luceneappengine;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -9,6 +18,12 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexInput;
@@ -22,7 +37,9 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Theories.class)
@@ -138,5 +155,58 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
             }
         }
     }
+    
+    @Theory
+    public void writeAndQueryMoreDocumentInDirectory(Version luceneVersion) throws IOException, ParseException {
+    	final String input1 = "Hello World!";
+    	final String input2 = "Helllo World!";
+    	
+    	try (Directory directory = new GaeDirectory()) {
+    		
+    		try (IndexWriter writer = new IndexWriter(directory, config())) {
+    			Document document = new Document();
+    			document.add(new Field("title", input1, TextField.TYPE_STORED));
+    			writer.addDocument(document);
+    		}
+    		
+    		try (IndexWriter writer = new IndexWriter(directory, config())) {
+    			Document document = new Document();
+    			document.add(new Field("title", input2, TextField.TYPE_STORED));
+    			writer.addDocument(document);
+    		}
+    		
+    		try (IndexReader reader = DirectoryReader.open(directory)) {
+    			String query = "He*";
+    			QueryParser queryParser = new QueryParser("title", new PorterAnalyzer());
+                queryParser.setAllowLeadingWildcard(true);
+                Query q = queryParser.parse(query);
+				IndexSearcher searcher = new IndexSearcher(reader);
+				TopScoreDocCollector collector = TopScoreDocCollector.create(100);
+				searcher.search(q, collector);
+				
+				ScoreDoc[] hits = collector.topDocs(0, 100).scoreDocs;
+				assertThat(hits.length, equalTo(2));
+				
+    			Document doc1 = searcher.doc(hits[0].doc); 
+    			Document doc2 = searcher.doc(hits[1].doc); 
+    			assertEquals(doc1.get("title"), input1);
+    			assertEquals(doc2.get("title"), input2);
+    		}
+    	}
+    }
+    
+    private class PorterAnalyzer extends Analyzer {
+
+		@Override
+		protected TokenStreamComponents createComponents(String fieldName) {
+			final StandardTokenizer src = new StandardTokenizer();
+		    TokenStream tok = new StandardFilter(src);
+		    tok = new LowerCaseFilter(tok);
+		    tok = new StopFilter(tok, StandardAnalyzer.STOP_WORDS_SET);
+		    tok = new PorterStemFilter(tok);
+		    return new TokenStreamComponents(src, tok);
+		}
+
+	}
 
 }
