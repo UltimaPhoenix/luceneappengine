@@ -45,80 +45,8 @@ Coming Soon:
   * 03-04-2014 Discontinued Lucene 3.6.x support, if you need it refer to the [old site](https://code.google.com/p/lucene-appengine)
 
 
-## Usage
-```
-GaeDirectory directory = new GaeDirectory();//create a default index
-IndexWriterConfig config = GaeLuceneUtil.getIndexWriterConfig(analyzer);//get configuration if you are using a LAE version less than 3.x.x add LUCENE_VERSION as parameter
-IndexWriter w = new IndexWriter(directory, config);//get the writer
-/* now use Apache Lucene like you're used to */
-```
-
-In order to manage multiple index instances simply create multiple [GaeDirectory](http://maven-site.lucene-appengine.googlecode.com/hg/apidocs/com/googlecode/lucene/appengine/GaeDirectory.html) instances with different names:
-```
-GaeDirectory directory = new GaeDirectory("anotherIndexName");
-```
-
-A complete example with source code [lucene-appengine-examples](http://code.google.com/p/lucene-appengine-examples)
-
-## Configuration
-Add into your _WEB-INF/web.xml_ the objectify servlet (see [objectify documenation for details and alternatives](https://code.google.com/p/objectify-appengine/wiki/Setup#Enable_ObjectifyFilter_for_your_requests)):
-```
-<web-app …>
-    …
-    <filter>
-        <filter-name>ObjectifyFilter</filter-name>
-        <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>ObjectifyFilter</filter-name>
-        <url-pattern>*</url-pattern>
-    </filter-mapping>
-    …
-</web-app>
-```
-
-Add into your _WEB-INF/appengine-web.xml_:
-```
-<appengine-web-app>
-....
-    <class-loader-config>
-        <priority-specifier filename="luceneappengine-[LAE Version].jar"/>
-    </class-loader-config>
-.....
-    <system-properties>
-        ...
-        <property name="os.version" value="1.0.GAE whatever" />
-        <property name="os.arch" value="GAE whatever" />
-    </system-properties>
-</appengine-web-app>
-```
-**WARNING**: If you are using a SNAPSHOT version of LAE using Maven, you must add the specific jar name of the snapshot, you can see the specific jar name typing on command line _'mvn clean package && ls -lR target/ | grep lucene-appengine'_
-
-## Maven
-If you are using maven to build/deploy google app engine war add this snippet to import the lucene directory
-```
-<dependencies>
-	<!-- Declare dependencies in this order -->
-	<dependency>
-		<groupId>com.googlecode.luceneappengine</groupId>
-		<artifactId>luceneappengine</artifactId>
-		<version>3.0.0</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-core</artifactId>
-		<version>5.0.0</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-analyzers-common</artifactId>
-		<version>5.0.0</version>
-	</dependency>
-....
-</dependencies>
-```
-
-For a complete example and source-code see [LAE Examples project](http://code.google.com/p/lucene-appengine-examples/)
+# Usage and Config
+Check the [wiki page](../../wiki/Usage-and-Configuration)
 
 ## Development
 If you like this project, you can [choose a kind of donation here](Donate.md) or give a free donation
