@@ -50,5 +50,5 @@ Coming Soon:
 Check the [wiki page](../../wiki/Usage-and-Configuration)
 
 ## Development
-If you like this project, you can [choose a kind of donation here](Donate.md) or give a free donation
-[![](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=LJXCLX64T7Z74&lc=GB&item_name=Lucene%20App%20Engine%20Project&item_number=LuceneAppEngine&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted). Thanks for your support!
+If you like this project, you can [choose a kind of donation here](../../wiki/Donate) or
+[![](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=LJXCLX64T7Z74&lc=GB&item_name=Lucene%20App%20Engine%20Project&item_number=LuceneAppEngine&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted) as much as you want. Thanks for your support!
