@@ -32,7 +32,8 @@ Coming Soon:
   * buffer management
 
 ## News
-  * 05-07-2015: Released New LAE-3.0.0 compatible with Lucene 5.0.0 (this is a major release with breaking changes)
+  * 05-07-2015 Wiki officially moved to GitHub
+  * 05-07-2015 Released New LAE-3.0.0 compatible with Lucene 5.0.0 (this is a major release with breaking changes)
   * 17-09-2014 Released New LAE-2.2.0 compatible with Lucene 4.10.x and Lucene 4.9.x 
   * 10-08-2014 Released New LAE-2.1.0 compatible with Lucene 4.9.x 
   * 23-07-2014 Released New LAE-2.0.1 **bugfix** and **performance improvements** release, **all other versions** are now **deprecated**
