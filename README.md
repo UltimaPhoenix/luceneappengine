@@ -6,6 +6,7 @@ This project provides a directory useful to build Lucene and Google App Engine p
 ![https://lucene.apache.org/images/lucene_logo_green_300.png](https://lucene.apache.org/images/lucene_logo_green_300.png) ![https://www.google.com/accounts/ah/appengine.jpg](https://www.google.com/accounts/ah/appengine.jpg)
 
 Main Features:
+  * Yes! It works, see it in action ([live demo site](https://bigtable-lucene.appspot.com)) [source](https://github.com/UltimaPhoenix/lucene-appengine-examples)
   * LAE 3.0.x compatible with Lucene 5.0.x
   * LAE 2.2.x compatible with Lucene 4.10.x, 4.9.x (**needs Java 7**, I will not say it anymore)
   * LAE 2.1.x compatible with Lucene 4.9.x (**needs Java 7**)
@@ -19,7 +20,6 @@ Main Features:
   * Multiple indexes in the same application
   * No more ([the wrong](http://stackoverflow.com/questions/9176993/disable-concurrentmergescheduler-in-lucene-3-5-0/12164826#12164826)) [RAMDirectory](http://lucene.apache.org/core/3_6_1/api/all/org/apache/lucene/store/RAMDirectory.html) for Google App Engine powered applications
   * No more index size limit of 1MB
-  * Yes! It works, see it in action ([live demo site](https://bigtable-lucene.appspot.com))
   * Open your mind to new Google App Engine applications powered by Lucene
   * For high performance applications use [google app engine task queue](https://developers.google.com/appengine/docs/java/taskqueue)
   * [Memcache](https://developers.google.com/appengine/docs/java/memcache/) supported and integrated for all versions
@@ -47,7 +47,7 @@ Coming Soon:
 
 
 # Usage and Config
-Check the [wiki page](../../wiki/Usage-and-Configuration)
+Check the [wiki page](../../wiki/Usage-and-Configuration). Or start from the [live demo source](https://github.com/UltimaPhoenix/lucene-appengine-examples)
 
 ## Development
 If you like this project, you can [choose a kind of donation here](../../wiki/Donate) or
