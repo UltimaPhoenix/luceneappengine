@@ -33,10 +33,10 @@ Coming Soon:
 
 ## News
   * 05-07-2015: now build with the new released LAE 3.0.0 and LUCENE 5.0.0, this is a major release with breaking changes check below the details
-  * 17-09-2014 Released New LAE-2.2.0 compatible with Lucene 4.10.x and Lucene 4.9.x (needs Java 7)
-  * 10-08-2014 Released New LAE-2.1.0 compatible with Lucene 4.9.x  (needs Java 7)
+  * 17-09-2014 Released New LAE-2.2.0 compatible with Lucene 4.10.x and Lucene 4.9.x 
+  * 10-08-2014 Released New LAE-2.1.0 compatible with Lucene 4.9.x 
   * 23-07-2014 Released New LAE-2.0.1 **bugfix** and **performance improvements** release, **all other versions** are now **deprecated**
-  * 20-05-2014 Released New LAE-2.0.0 compatible with Lucene 4.8.x  (needs Java 7)
+  * 20-05-2014 Released New LAE-2.0.0 compatible with Lucene 4.8.x
   * 05-04-2014 Released New LAE-1.2.0 compatible with Lucene 4.7.x
   * 05-04-2014 Released New LAE-1.1.0 compatible only with Lucene 4.6.x
   * 03-04-2014 Migration of source code completed on [GitHub](https://github.com/UltimaPhoenix/luceneappengine)
