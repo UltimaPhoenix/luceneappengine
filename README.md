@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/UltimaPhoenix/luceneappengine.svg?branch=master)](https://travis-ci.org/UltimaPhoenix/luceneappengine)
-
-Lucene App Engine project (aka LAE)
+Lucene App Engine project (aka LAE) [![Build Status](https://travis-ci.org/UltimaPhoenix/luceneappengine.svg?branch=master)](https://travis-ci.org/UltimaPhoenix/luceneappengine)
 ===============
 
 This project provides a directory useful to build Lucene and Google App Engine powered applications.
