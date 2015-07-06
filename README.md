@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/UltimaPhoenix/luceneappengine.svg?branch=master)](https://travis-ci.org/UltimaPhoenix/luceneappengine)
+
 Lucene App Engine project (aka LAE)
 ===============
 
