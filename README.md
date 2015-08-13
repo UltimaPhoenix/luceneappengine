@@ -1,4 +1,4 @@
-Lucene App Engine (aka LAE) [![Build Status](https://travis-ci.org/UltimaPhoenix/luceneappengine.svg?branch=master)](https://travis-ci.org/UltimaPhoenix/luceneappengine) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.googlecode.luceneappengine/luceneappengine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.googlecode.luceneappengine/luceneappengine) [![Coverage Status](https://coveralls.io/repos/UltimaPhoenix/luceneappengine/badge.svg?branch=master&service=github)](https://coveralls.io/github/UltimaPhoenix/luceneappengine?branch=master)
+Lucene App Engine (aka LAE) [![Build Status](https://travis-ci.org/UltimaPhoenix/luceneappengine.svg?branch=master)](https://travis-ci.org/UltimaPhoenix/luceneappengine) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.googlecode.luceneappengine/luceneappengine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.googlecode.luceneappengine/luceneappengine)
 ===============
 
 This project provides a directory useful to build Lucene and Google App Engine powered applications.
