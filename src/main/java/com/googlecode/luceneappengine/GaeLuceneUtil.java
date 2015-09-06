@@ -3,7 +3,6 @@ package com.googlecode.luceneappengine;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.SerialMergeScheduler;
-import org.apache.lucene.util.Version;
 
 /**
  * Class that provides configuration utility in order to use {@link GaeDirectory}.
