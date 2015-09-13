@@ -9,6 +9,7 @@ Live Demo:
  * See it in action ([live demo site](https://bigtable-lucene.appspot.com)) or check the [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
 
 Main Features:
+  * LAE 3.1.x compatible with Lucene 5.1.x
   * LAE 3.0.x compatible with Lucene 5.0.x
   * LAE 2.2.x compatible with Lucene 4.10.x, 4.9.x (**needs Java 7**, I will not say it anymore)
   * LAE 2.1.x compatible with Lucene 4.9.x (**needs Java 7**)
@@ -35,6 +36,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 13-09-2015 Released New LAE-3.1.0 (Issue releasing on maven central coming soon)
   * 05-07-2015 Wiki officially moved to GitHub
   * 05-07-2015 Released New LAE-3.0.0 compatible with Lucene 5.0.0 (this is a major release with breaking changes)
   * 17-09-2014 Released New LAE-2.2.0 compatible with Lucene 4.10.x and Lucene 4.9.x 
