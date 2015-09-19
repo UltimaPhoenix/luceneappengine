@@ -198,7 +198,7 @@
 				</executions>
 				<configuration>
 					<links>
-						<link>https://lucene.apache.org/core/5_0_0/core</link>
+						<link>https://lucene.apache.org/core/5_1_0/core</link>
 						<link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
 					</links>
 					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
@@ -303,7 +303,6 @@
 		<!-- custom scm configurations -->
 		<github.username>UltimaPhoenix</github.username>
 		<bitbucket.username>Dark_Phoenix</bitbucket.username>
-		<googlecode.username>fabio.grucci</googlecode.username>
         <gpg.keyname>fabio.grucci@gmail.com</gpg.keyname>
 	</properties>
 	<distributionManagement>
@@ -317,11 +316,6 @@
             <name>Sonatype OSSRH Releases</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-		<site>
-			<id>lucene-appengine</id>
-            <name>Maven generated site</name>
-			<url>scm:git:https://code.google.com/p/${googlecode.project}.maven-site</url>
-		</site>
 	</distributionManagement>
 
 	<dependencies>
@@ -450,7 +444,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <links>
-                        <link>https://lucene.apache.org/core/5_0_0/core</link>
+                        <link>https://lucene.apache.org/core/5_1_0/core</link>
                         <link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
                     </links>
                     <excludePackageNames>org.apache.lucene.*</excludePackageNames>
