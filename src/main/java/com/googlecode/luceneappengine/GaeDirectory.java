@@ -32,7 +32,7 @@ import com.googlecode.objectify.cache.PendingFutures;
  * a name specified in constructor {@link GaeDirectory#GaeDirectory(String)}, 
  * for details read constructor documentation.
  * <b>In order to open an index writer is highly recommended the usage of configuration provided by 
- * {@link GaeLuceneUtil#getIndexWriterConfig(org.apache.lucene.util.Version, org.apache.lucene.analysis.Analyzer)}</b>.
+ * {@link GaeLuceneUtil#getIndexWriterConfig(org.apache.lucene.analysis.Analyzer)}</b>.
  * <pre>
  * {@code
  * GaeDirectory directory = new GaeDirectory();
@@ -40,7 +40,7 @@ import com.googlecode.objectify.cache.PendingFutures;
  * IndexWriter writer = new IndexWriter(directory, config);
  * }
  * </pre>
- * <br />
+ * <br >
  * <i>
  * If your application throws {@link NoClassDefFoundError} while using {@link GaeDirectory} 
  * in order to make it work, into your GAE web application, the modified {@link RamUsageEstimator} 
