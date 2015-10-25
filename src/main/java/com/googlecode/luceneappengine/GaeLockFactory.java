@@ -5,9 +5,12 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.lucene.store.AlreadyClosedException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.Lock;
 import org.apache.lucene.store.LockFactory;
+import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.store.LockReleaseFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,19 +50,51 @@ final class GaeLockFactory extends LockFactory {
 	 * @see org.apache.lucene.store.LockFactory#makeLock(java.lang.String)
 	 */
 	@Override
-	public Lock makeLock(final Directory dir, final String lockName) {
+	public Lock obtainLock(final Directory dir, final String lockName) throws LockObtainFailedException, IOException {
 		if (!(dir instanceof GaeDirectory)) {
 	      throw new UnsupportedOperationException(getClass().getSimpleName() + " can only be used with GaeDirectory subclasses, got: " + dir);
 	    }
 		final Key<LuceneIndex> indexKey = ((GaeDirectory) dir).indexKey;
+		boolean obtainedLock;
+		try {
+			obtainedLock = ofy().transactNew(new Work<Boolean>() {
+				@Override
+				public Boolean run() {
+					final boolean obtained;
+					GaeLock gaeLock = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
+					if (gaeLock == null) {
+						log.trace("Creating new Lock '{}.{}'.", indexKey, lockName);
+						gaeLock = new GaeLock(indexKey, lockName);
+					}
+					if (gaeLock.locked) {
+						log.debug("Cannot lock Lock '{}.{}'.", indexKey, lockName);
+						obtained = false;
+					} else {
+						log.debug("Locking Lock '{}.{}'.", indexKey, lockName);
+						gaeLock.locked = true;
+						ofy().save().entity(gaeLock).now();
+						obtained = true;
+					}
+					return obtained;
+				}
+			});
+		} catch (RuntimeException e) {
+			log.error("Error obtaining lock:{} error:{}", lockName, e.getMessage(), e);
+			throw new LockObtainFailedException("Error obtaining lock:" + lockName, e);
+		}
+		if (!obtainedLock) {
+			throw new LockObtainFailedException("Cannot lock Lock " + indexKey + "." + lockName);
+		}
+		
 		return new Lock() {
+			boolean closed;
 			/*
 			 * (non-Javadoc)
 			 * 
 			 * @see org.apache.lucene.store.Lock#close()
 			 */
 			@Override
-			public void close() throws IOException {
+			public void close() throws LockReleaseFailedException {
 				try {
 					ofy().transactNew(3, new Work<Void>() {
 						@Override
@@ -77,54 +112,24 @@ final class GaeLockFactory extends LockFactory {
 					});
 				} catch (RuntimeException e) {
 					log.error("Error closing lock:{} error:{}", lockName, e.getMessage(), e);
-					throw new IOException("Error closing lock:" + lockName, e);
+					throw new LockReleaseFailedException("Error closing lock:" + lockName, e);
+				} finally {
+					closed = true;
 				}
 			}
-
 			/*
 			 * (non-Javadoc)
-			 * 
-			 * @see org.apache.lucene.store.Lock#obtain()
+			 * @see org.apache.lucene.store.Lock#ensureValid()
 			 */
 			@Override
-			public boolean obtain() throws IOException {
-				try {
-					return ofy().transactNew(new Work<Boolean>() {
-						@Override
-						public Boolean run() {
-							final boolean obtained;
-							GaeLock gaeLock = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
-							if (gaeLock == null) {
-								log.trace("Creating new Lock '{}.{}'.", indexKey, lockName);
-								gaeLock = new GaeLock(indexKey, lockName);
-							}
-							if (gaeLock.locked) {
-								log.debug("Cannot lock Lock '{}.{}'.", indexKey, lockName);
-								obtained = false;
-							} else {
-								log.debug("Locking Lock '{}.{}'.", indexKey, lockName);
-								gaeLock.locked = true;
-								ofy().save().entity(gaeLock).now();
-								obtained = true;
-							}
-							return obtained;
-						}
-					});
-				} catch (RuntimeException e) {
-					log.error("Error obtaining lock:{} error:{}", lockName, e.getMessage(), e);
-					throw new IOException("Error obtaining lock:" + lockName, e);
+			public void ensureValid() throws IOException, AlreadyClosedException {
+				/*
+				 * Always valid. BTW can be checked if the lock still exists, 
+				 * but it's guaranteed by Objectify transactions, so nothing to do here.
+				 */
+				if (closed) {
+					throw new AlreadyClosedException("Lock " + indexKey + "." + lockName + " already closed");
 				}
-			}
-
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.apache.lucene.store.Lock#isLocked()
-			 */
-			@Override
-			public boolean isLocked() throws IOException {
-				final GaeLock find = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
-				return find != null && find.locked;
 			}
 		};
 	}
