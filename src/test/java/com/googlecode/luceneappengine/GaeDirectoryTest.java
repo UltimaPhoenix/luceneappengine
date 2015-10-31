@@ -58,7 +58,10 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
 		Version.LUCENE_4_9, Version.LUCENE_4_9_0, 
 		Version.LUCENE_4_10_0, Version.LUCENE_4_10_1, Version.LUCENE_4_10_2, Version.LUCENE_4_10_3,
 		Version.LUCENE_CURRENT,
-		Version.LUCENE_5_0_0,
+		Version.LUCENE_5_0_0, 
+		Version.LUCENE_5_1_0, 
+		Version.LUCENE_5_2_0, Version.LUCENE_5_2_1,
+		Version.LUCENE_5_3_0, Version.LUCENE_5_3_1, Version.LUCENE_5_3_2,
 		Version.LATEST
 	};
     
