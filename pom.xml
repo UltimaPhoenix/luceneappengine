@@ -4,7 +4,7 @@
 
 	<groupId>com.googlecode.luceneappengine</groupId>
 	<artifactId>luceneappengine</artifactId>
-	<version>3.2.0-SNAPSHOT</version>
+	<version>3.2.0</version>
 	<packaging>jar</packaging>
 	
 	<name>LuceneAppEngine</name>
@@ -411,6 +411,7 @@
 	    <connection>scm:git:git@github.com:${github.username}/${repository.project.name}.git</connection>
 	    <developerConnection>scm:git:git@github.com:${github.username}/${repository.project.name}.git</developerConnection>
 	    <url>git@github.com:${github.username}/${repository.project.name}.git</url>
+    <tag>luceneappengine-3.2.0</tag>
   </scm>
 
 	<issueManagement>
