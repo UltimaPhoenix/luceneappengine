@@ -37,6 +37,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 27-12-2015 Released New LAE-3.3.0 compatible with Lucene 5.4.x
   * 01-11-2015 Released New LAE-3.2.0 compatible with Lucene 5.3.x
   * 27-09-2015 Released New LAE-3.1.1 compatible with Lucene 5.2.x, 5.1.x 
   * 13-09-2015 Released New LAE-3.1.0 (broken version: can only read from index)
