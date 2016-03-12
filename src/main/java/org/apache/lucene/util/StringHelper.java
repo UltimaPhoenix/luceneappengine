@@ -1,5 +1,3 @@
-package org.apache.lucene.util;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.lucene.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.lucene.util;
+
 
 import java.io.DataInputStream;
 import java.math.BigInteger;
@@ -69,14 +69,6 @@ public abstract class StringHelper {
   }
 
   private StringHelper() {
-  }
-
-  public static boolean equals(String s1, String s2) {
-    if (s1 == null) {
-      return s2 == null;
-    } else {
-      return s1.equals(s2);
-    }
   }
 
   /**

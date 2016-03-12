@@ -1,5 +1,3 @@
-package org.apache.lucene.util;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,11 +14,15 @@ package org.apache.lucene.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.lucene.util;
+
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.IdentityHashMap;
@@ -290,7 +292,13 @@ public final class RamUsageEstimator {
 
     // Walk type hierarchy
     for (;clazz != null; clazz = clazz.getSuperclass()) {
-      final Field[] fields = clazz.getDeclaredFields();
+      final Class<?> target = clazz;
+      final Field[] fields = AccessController.doPrivileged(new PrivilegedAction<Field[]>() {
+        @Override
+        public Field[] run() {
+          return target.getDeclaredFields();
+        }
+      });
       for (Field f : fields) {
         if (!Modifier.isStatic(f.getModifiers())) {
           size = adjustForField(size, f);
