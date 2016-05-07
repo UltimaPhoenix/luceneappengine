@@ -198,7 +198,7 @@
 				</executions>
 				<configuration>
 					<links>
-						<link>https://lucene.apache.org/core/5_5_0/core</link>
+						<link>https://lucene.apache.org/core/5_5_1/core</link>
 						<link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
 					</links>
 					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
@@ -282,7 +282,7 @@
 		<license.includedArtifacts>lucene-core</license.includedArtifacts>
 
 		<objectify.version>5.1.12</objectify.version>
-		<lucene.version>5.5.0</lucene.version>
+		<lucene.version>5.5.1</lucene.version>
 
 		<slf4j.version>1.7.13</slf4j.version>
 
