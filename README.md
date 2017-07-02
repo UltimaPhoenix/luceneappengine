@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0066683d0eeb4dfa82e0d387c46a9a2d)](https://www.codacy.com/app/UltimaPhoenix/luceneappengine?utm_source=github.com&utm_medium=referral&utm_content=UltimaPhoenix/luceneappengine&utm_campaign=badger)
 LuceneAppEngine (aka LAE) [![Build Status](https://travis-ci.org/UltimaPhoenix/luceneappengine.svg?branch=master)](https://travis-ci.org/UltimaPhoenix/luceneappengine) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.googlecode.luceneappengine/luceneappengine/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.googlecode.luceneappengine/luceneappengine) [![Javadocs](https://www.javadoc.io/badge/com.googlecode.luceneappengine/luceneappengine.svg?color=blue)](https://www.javadoc.io/doc/com.googlecode.luceneappengine/luceneappengine)
 ===============
 
