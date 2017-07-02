@@ -29,7 +29,7 @@ class SegmentIndexOutput extends IndexOutput {
 		super(segment.name);
 		this.segment = segment;
 		this.hunk = segment.getHunk(0);
-		this.writer = new LimitedByteArrayWriter(hunk.bytes, SegmentHunk.MAX_BYTES_LENGTH);
+		this.writer = new LimitedByteArrayWriter(hunk.bytes, MAX_BYTES_LENGTH);
 	}
 	/*
 	 * (non-Javadoc)
