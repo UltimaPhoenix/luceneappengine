@@ -16,6 +16,7 @@ import org.apache.lucene.util.RamUsageEstimator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.MoreObjects;
 import com.googlecode.luceneappengine.objectify.util.ObjectifyBuilder;
 import com.googlecode.luceneappengine.objectify.util.ObjectifyUtil;
 import com.googlecode.objectify.Key;
@@ -81,10 +82,7 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	public GaeDirectory(String indexName) {
 		super(GaeLockFactory.getInstance());
-		if(indexName == null) {
-			indexName = DEFAULT_GAE_LUCENE_INDEX_NAME;
-		}
-		this.indexKey = createIndexIfNotExist(indexName);
+		this.indexKey = createIndexIfNotExist(MoreObjects.firstNonNull(indexName, DEFAULT_GAE_LUCENE_INDEX_NAME));
 	}
 	/**
 	 * Create a {@link GaeDirectory} for existing index.
