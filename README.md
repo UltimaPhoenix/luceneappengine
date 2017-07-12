@@ -34,11 +34,13 @@ Main Features:
   * Easier to configure than the [previous LAE version](https://code.google.com/p/lucene-appengine)
 
 Coming Soon:
+  * Lucene 6 Support, Java 8
   * Performance improvements:
   * asynch indexing
   * buffer management
 
 ## News
+  * 28-06-2017 Today Google completed the long standing [feature request for Servlet 3 and Java 8](https://issuetracker.google.com/issues/35887151) and I'm happy to start to adapt Lucene 6 to the new [beta standard environment Java 8 powered](https://cloudplatform.googleblog.com/2017/06/Google-App-Engine-standard-now-supports-Java-8.html)
   * 23-07-2016 Unfortunately Lucene 6 need Java 8 and AppEngine standard environment only supports Java 7
   * 23-04-2016 Released New LAE-3.4.0 compatible with Lucene 5.5.x
   * 27-12-2015 Released New LAE-3.3.0 compatible with Lucene 5.4.x
