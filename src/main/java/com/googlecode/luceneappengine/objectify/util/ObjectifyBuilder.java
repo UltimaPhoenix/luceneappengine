@@ -4,6 +4,6 @@ import com.googlecode.objectify.Key;
 
 public interface ObjectifyBuilder<T> {
 	
-	public T newIstance(Key<T> key);
+	T newInstance(Key<T> key);
 	
 }

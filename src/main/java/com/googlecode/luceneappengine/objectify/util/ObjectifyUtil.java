@@ -23,7 +23,7 @@ public enum ObjectifyUtil {
 				public T run() {
 					T t = ofy().load().key(key).now();
 					if(t == null) {
-						t = builder.newIstance(key);
+						t = builder.newInstance(key);
 						ofy().save().entity(t).now();
 					}
 					return t;
