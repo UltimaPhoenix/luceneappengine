@@ -132,7 +132,7 @@ public class GaeDirectory extends BaseDirectory {
 		});
 	}
 	/**
-	 * Delete the segment using the specified {@link Objectify} usefull for transaction.
+	 * Delete the segment using the specified {@link Objectify} useful for transaction.
 	 * @param objectify The {@link Objectify} to use
 	 * @param name The name of the segment to delete
 	 */
@@ -154,8 +154,7 @@ public class GaeDirectory extends BaseDirectory {
 	protected void logSegment(Segment segment, String name, int index) {
 		Objectify objectify = ofy();
 		final SegmentHunk hunk = objectify.load().key(newSegmentHunkKey(name, index)).now();
-		byte[] content = Arrays.copyOfRange(hunk.bytes, 0, (int) (hunk.bytes.length % (segment.length / hunk.id)));
-		hunk.bytes = content;
+		hunk.bytes = Arrays.copyOfRange(hunk.bytes, 0, (int) (hunk.bytes.length % (segment.length / hunk.id)));
 		log.info("Hunk '{}-{}-{}' with length {}, Value={}", 
 				indexKey.getName(), name, hunk.id, hunk.bytes.length, new String(hunk.bytes));
 	}
@@ -285,7 +284,7 @@ public class GaeDirectory extends BaseDirectory {
 	
 	private static class LuceneIndexBuilder implements ObjectifyBuilder<LuceneIndex>{
 		@Override
-		public LuceneIndex newIstance(Key<LuceneIndex> key) {
+		public LuceneIndex newInstance(Key<LuceneIndex> key) {
 			return new LuceneIndex(key.getName());
 		}
 	}

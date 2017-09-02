@@ -48,10 +48,8 @@ class Segment {
 	
 	public SegmentHunk newHunk() {
 		hunkCount++;
-		log.debug("Created Hunk '{}-{}-{}'.", new Object[] {index.getName(), name, hunkCount});
-		final SegmentHunk newHunk = new SegmentHunk(getKey(), hunkCount);
-		
-		return newHunk;
+		log.debug("Created Hunk '{}-{}-{}'.", index.getName(), name, hunkCount);
+		return new SegmentHunk(getKey(), hunkCount);
 	}
 	
 	List<Key<SegmentHunk>> getHunkKeys(Key<Segment> currentKey) {
