@@ -18,7 +18,7 @@ public final class GaeLuceneUtil {
 	 * @param analyzer The analyzer to use
 	 * @return An {@link IndexWriterConfig} properly configured
 	 */
-	@SuppressWarnings("resource")//SerialMergeSceduler is Closable
+	@SuppressWarnings("resource")//SerialMergeScheduler is Closable
 	public static IndexWriterConfig getIndexWriterConfig(Analyzer analyzer) {
 		final IndexWriterConfig config = new IndexWriterConfig(analyzer);
 		config.setMergeScheduler(new SerialMergeScheduler());

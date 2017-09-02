@@ -42,7 +42,7 @@ class Segment {
 		this.index = index;
 	}
 	
-	public SegmentHunk getHunk(int index) {//GAE id cannotstart from zero
+	public SegmentHunk getHunk(int index) {//GAE id can not start from zero
 		return ofy().load().key(buildSegmentHunkKey(index)).now();
 	}
 	

@@ -25,7 +25,7 @@ class SegmentIndexInput extends IndexInput {
 	}
 	/**
 	 * Used by {@link #slice(String, long, long)}.
-	 * @param sliceParent parend {@link SegmentIndexInput}
+	 * @param sliceParent parent {@link SegmentIndexInput}
 	 * @param description
 	 * @param offset
 	 */

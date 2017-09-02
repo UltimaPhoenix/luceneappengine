@@ -33,7 +33,6 @@ final class GaeLockFactory extends LockFactory {
 	/**
 	 * Return a new {@link GaeLockFactory} specific for the index.
 	 * 
-	 * @param indexKey
 	 * @return A {@link GaeLockFactory} for this index
 	 */
 	public static GaeLockFactory getInstance() {
@@ -105,7 +104,7 @@ final class GaeLockFactory extends LockFactory {
 								gaeLock.locked = false;
 								ofy().save().entity(gaeLock).now();
 							} else {
-								log.warn("Tryng to release a non locked Lock '{}'.", lockName);
+								log.warn("Trying to release a non locked Lock '{}'.", lockName);
 							}
 							return null;
 						}

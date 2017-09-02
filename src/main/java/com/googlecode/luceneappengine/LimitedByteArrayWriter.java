@@ -72,7 +72,7 @@ class LimitedByteArrayWriter {
 
 	protected void expandByteArrayToPosition(int position) throws IOException {
 		int newZeroBytes = position - this.length;
-//		System.out.println("exapnd to: " + newZeroBytes);
+//		System.out.println("expand to: " + newZeroBytes);
 		this.position = this.length;
 		write(new byte[newZeroBytes], 0, newZeroBytes);
 	}
