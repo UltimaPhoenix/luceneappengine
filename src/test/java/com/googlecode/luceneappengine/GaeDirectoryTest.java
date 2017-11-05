@@ -2,14 +2,8 @@ package com.googlecode.luceneappengine;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.analysis.core.StopFilter;
-import org.apache.lucene.analysis.en.PorterStemFilter;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.standard.StandardFilter;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -47,28 +41,26 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
 	@DataPoints
 	@SuppressWarnings("deprecation")//try backward compatibility
     public static final Version[] LUCENE_TEST_VERSIONS = new Version[] {
-		Version.LUCENE_4_0, Version.LUCENE_4_1, Version.LUCENE_4_1_0,
-		Version.LUCENE_4_2, Version.LUCENE_4_2_0, Version.LUCENE_4_2_1,
-		Version.LUCENE_4_3, Version.LUCENE_4_3_0, Version.LUCENE_4_3_1,
-		Version.LUCENE_4_4, Version.LUCENE_4_4_0,
-		Version.LUCENE_4_5, Version.LUCENE_4_5_0, Version.LUCENE_4_5_1,
-		Version.LUCENE_4_6, Version.LUCENE_4_6_0, Version.LUCENE_4_6_1,
-		Version.LUCENE_4_7, Version.LUCENE_4_7_0, Version.LUCENE_4_7_1, Version.LUCENE_4_7_2,
-		Version.LUCENE_4_8, Version.LUCENE_4_8_0, Version.LUCENE_4_8_1, 
-		Version.LUCENE_4_9, Version.LUCENE_4_9_0, 
-		Version.LUCENE_4_10_0, Version.LUCENE_4_10_1, Version.LUCENE_4_10_2, Version.LUCENE_4_10_3,
+		Version.LUCENE_6_0_0, Version.LUCENE_6_0_1,
+        Version.LUCENE_6_1_0,
+        Version.LUCENE_6_2_0, Version.LUCENE_6_2_1,
+        Version.LUCENE_6_3_0,
+        Version.LUCENE_6_4_0, Version.LUCENE_6_4_1, Version.LUCENE_6_4_2,
+        Version.LUCENE_6_5_0, Version.LUCENE_6_5_1,
+        Version.LUCENE_6_6_0, Version.LUCENE_6_6_1,
+        Version.LUCENE_6_7_0,
+        Version.LUCENE_7_0_0, Version.LUCENE_7_0_1,
+        Version.LUCENE_7_1_0,
 		Version.LUCENE_CURRENT,
-		Version.LUCENE_5_0_0, 
-		Version.LUCENE_5_1_0, 
-		Version.LUCENE_5_2_0, Version.LUCENE_5_2_1,
-		Version.LUCENE_5_3_0, Version.LUCENE_5_3_1, Version.LUCENE_5_3_2, 
-		Version.LUCENE_5_4_0, Version.LUCENE_5_4_1,
-		Version.LUCENE_5_5_0,
 		Version.LATEST
 	};
     
     private static IndexWriterConfig config() {
-        return GaeLuceneUtil.getIndexWriterConfig(new SimpleAnalyzer());
+        return config(new SimpleAnalyzer());
+    }
+
+    private static IndexWriterConfig config(Analyzer analyzer) {
+        return GaeLuceneUtil.getIndexWriterConfig(analyzer);
     }
 
     @Test
@@ -136,16 +128,17 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
     public void writeAndReadMoreDocumentInDirectory(Version luceneVersion) throws IOException {
         final String input1 = "Hello World!";
         final String input2 = "Hello World!";
-        
+
+        final CustomAnalyzer analyzer = customAnalyzer();
         try (Directory directory = new GaeDirectory()) {
             
-            try (IndexWriter writer = new IndexWriter(directory, config())) {
+            try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
                 Document document = new Document();
                 document.add(new Field("title", input1, TextField.TYPE_STORED));
                 writer.addDocument(document);
             }
             
-            try (IndexWriter writer = new IndexWriter(directory, config())) {
+            try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
                 Document document = new Document();
                 document.add(new Field("title", input2, TextField.TYPE_STORED));
                 writer.addDocument(document);
@@ -159,35 +152,36 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
             }
         }
     }
-    
+
     @Theory
     public void writeAndQueryMoreDocumentInDirectory(Version luceneVersion) throws IOException, ParseException {
     	final String input1 = "Hello World!";
     	final String input2 = "Helllo World!";
-    	
-    	try (Directory directory = new GaeDirectory()) {
+
+        CustomAnalyzer analyzer = customAnalyzer();
+        try (Directory directory = new GaeDirectory()) {
     		
-    		try (IndexWriter writer = new IndexWriter(directory, config())) {
+    		try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
     			Document document = new Document();
     			document.add(new Field("title", input1, TextField.TYPE_STORED));
     			writer.addDocument(document);
     		}
     		
-    		try (IndexWriter writer = new IndexWriter(directory, config())) {
+    		try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
     			Document document = new Document();
     			document.add(new Field("title", input2, TextField.TYPE_STORED));
     			writer.addDocument(document);
+    			writer.commit();
     		}
-    		
     		try (IndexReader reader = DirectoryReader.open(directory)) {
-    			String query = "He*";
-    			QueryParser queryParser = new QueryParser("title", new PorterAnalyzer());
+    			String query = "he*";
+    			QueryParser queryParser = new QueryParser("title", analyzer);
                 queryParser.setAllowLeadingWildcard(true);
                 Query q = queryParser.parse(query);
 				IndexSearcher searcher = new IndexSearcher(reader);
 				TopScoreDocCollector collector = TopScoreDocCollector.create(100);
 				searcher.search(q, collector);
-				
+
 				ScoreDoc[] hits = collector.topDocs(0, 100).scoreDocs;
 				assertThat(hits.length, equalTo(2));
 				
@@ -198,19 +192,15 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
     		}
     	}
     }
-    
-    private class PorterAnalyzer extends Analyzer {
 
-		@Override
-		protected TokenStreamComponents createComponents(String fieldName) {
-			final StandardTokenizer src = new StandardTokenizer();
-		    TokenStream tok = new StandardFilter(src);
-		    tok = new LowerCaseFilter(tok);
-		    tok = new StopFilter(tok, StandardAnalyzer.STOP_WORDS_SET);
-		    tok = new PorterStemFilter(tok);
-		    return new TokenStreamComponents(src, tok);
-		}
-
-	}
+    private static CustomAnalyzer customAnalyzer() throws IOException {
+        return CustomAnalyzer.builder()
+                .withTokenizer("standard")
+                .addTokenFilter("standard")
+                .addTokenFilter("lowercase")
+                .addTokenFilter("stop")
+                .addTokenFilter("snowballporter")
+                .build();
+    }
 
 }

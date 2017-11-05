@@ -26,7 +26,7 @@ class SegmentIndexOutput extends IndexOutput {
 	private int lastFlushIndex;
 	
 	public SegmentIndexOutput(Segment segment) {
-		super(segment.name);
+		super(segment.name, segment.name);
 		this.segment = segment;
 		this.hunk = segment.getHunk(0);
 		this.writer = new LimitedByteArrayWriter(hunk.bytes, MAX_BYTES_LENGTH);

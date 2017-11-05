@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.lucene.store.BaseDirectory;
 import org.apache.lucene.store.Directory;
@@ -194,6 +195,19 @@ public class GaeDirectory extends BaseDirectory {
 		}
 		return new SegmentIndexOutput(segment);
 	}
+
+	@Override
+	public IndexOutput createTempOutput(String prefix, String suffix, IOContext context) throws IOException {
+		final String tempName = prefix + "_" + UUID.randomUUID().toString() + "_" + suffix;
+		ensureOpen();
+		final Objectify begin = ofy();
+		Segment segment = begin.load().key(newSegmentKey(tempName)).now();
+		if(segment == null) {
+			segment = newSegment(tempName);
+		}
+		return new SegmentIndexOutput(segment);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.apache.lucene.store.Directory#deleteFile(java.lang.String)
@@ -210,26 +224,23 @@ public class GaeDirectory extends BaseDirectory {
 		objectify.delete().key(newSegmentKey(name));
 	}
 	@Override
-	public void renameFile(final String source, final String dest) throws IOException {
-		ofy().execute(TxnType.REQUIRES_NEW, new Work<Void>() {
-			@Override
-			public Void run() {
-				Segment sourceSegment = ofy().load().key(newSegmentKey(source)).now();
-				
-				Segment destSegment = copySegment(sourceSegment);
-				destSegment.name = dest;
-				Key<Segment> destSegmentKey = ofy().save().entity(destSegment).now();
-				
-				final long hunkCount = sourceSegment.hunkCount;
-				for (int i = 0; i < hunkCount; i++) {
-					SegmentHunk hunk = sourceSegment.getHunk(i);
-					SegmentHunk destHunk = copySegmentHunk(hunk);
-					destHunk.segment = destSegmentKey;
-					ofy().save().entity(destHunk);
-				}
-				deleteFile(source);
-				return null;
+	public void rename(final String source, final String dest) throws IOException {
+		ofy().execute(TxnType.REQUIRES_NEW, (Work<Void>) () -> {
+			Segment sourceSegment = ofy().load().key(newSegmentKey(source)).now();
+
+			Segment destSegment = copySegment(sourceSegment);
+			destSegment.name = dest;
+			Key<Segment> destSegmentKey = ofy().save().entity(destSegment).now();
+
+			final long hunkCount = sourceSegment.hunkCount;
+			for (int i = 0; i < hunkCount; i++) {
+				SegmentHunk hunk = sourceSegment.getHunk(i);
+				SegmentHunk destHunk = copySegmentHunk(hunk);
+				destHunk.segment = destSegmentKey;
+				ofy().save().entity(destHunk);
 			}
+			deleteFile(source);
+			return null;
 		});
 	}
 	/*
@@ -293,7 +304,10 @@ public class GaeDirectory extends BaseDirectory {
 	public void sync(Collection<String> names) throws IOException {
 		PendingFutures.completeAllPendingFutures();
 	}
-	
+	@Override
+	public void syncMetaData() throws IOException {
+		PendingFutures.completeAllPendingFutures();
+	}
 	private Segment copySegment(Segment sourceSegment) {
 		Segment copy = new Segment(indexKey, sourceSegment.name);
 		copy.lastModified = System.currentTimeMillis();
