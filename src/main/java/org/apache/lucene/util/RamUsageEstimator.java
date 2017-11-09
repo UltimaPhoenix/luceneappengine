@@ -35,42 +35,82 @@ import java.util.Map;
  * This class uses assumptions that were discovered for the Hotspot
  * virtual machine. If you use a non-OpenJDK/Oracle-based JVM,
  * the measurements may be slightly wrong.
- * 
+ *
  * @see #shallowSizeOf(Object)
  * @see #shallowSizeOfInstance(Class)
- * 
+ *
  * @lucene.internal
  */
 public final class RamUsageEstimator {
 
   /** One kilobyte bytes. */
   public static final long ONE_KB = 1024;
-  
+
   /** One megabyte bytes. */
   public static final long ONE_MB = ONE_KB * ONE_KB;
-  
+
   /** One gigabyte bytes.*/
   public static final long ONE_GB = ONE_KB * ONE_MB;
 
   /** No instantiation. */
   private RamUsageEstimator() {}
 
+  /**
+   * Number of bytes used to represent a {@code boolean} in binary form
+   * @deprecated use {@code 1} instead.
+   */
+  @Deprecated
   public final static int NUM_BYTES_BOOLEAN = 1;
+  /**
+   * Number of bytes used to represent a {@code byte} in binary form
+   * @deprecated use {@code 1} instead.
+   */
+  @Deprecated
   public final static int NUM_BYTES_BYTE = 1;
-  public final static int NUM_BYTES_CHAR = 2;
-  public final static int NUM_BYTES_SHORT = 2;
-  public final static int NUM_BYTES_INT = 4;
-  public final static int NUM_BYTES_FLOAT = 4;
-  public final static int NUM_BYTES_LONG = 8;
-  public final static int NUM_BYTES_DOUBLE = 8;
+  /**
+   * Number of bytes used to represent a {@code char} in binary form
+   * @deprecated use {@link Character#BYTES} instead.
+   */
+  @Deprecated
+  public final static int NUM_BYTES_CHAR = Character.BYTES;
+  /**
+   * Number of bytes used to represent a {@code short} in binary form
+   * @deprecated use {@link Short#BYTES} instead.
+   */
+  @Deprecated
+  public final static int NUM_BYTES_SHORT = Short.BYTES;
+  /**
+   * Number of bytes used to represent an {@code int} in binary form
+   * @deprecated use {@link Integer#BYTES} instead.
+   */
+  @Deprecated
+  public final static int NUM_BYTES_INT = Integer.BYTES;
+  /**
+   * Number of bytes used to represent a {@code float} in binary form
+   * @deprecated use {@link Float#BYTES} instead.
+   */
+  @Deprecated
+  public final static int NUM_BYTES_FLOAT = Float.BYTES;
+  /**
+   * Number of bytes used to represent a {@code long} in binary form
+   * @deprecated use {@link Long#BYTES} instead.
+   */
+  @Deprecated
+  public final static int NUM_BYTES_LONG = Long.BYTES;
+  /**
+   * Number of bytes used to represent a {@code double} in binary form
+   * @deprecated use {@link Double#BYTES} instead.
+   */
+  @Deprecated
+  public final static int NUM_BYTES_DOUBLE = Double.BYTES;
 
-  /** 
-   * True, iff compressed references (oops) are enabled by this JVM 
+  /**
+   * True, iff compressed references (oops) are enabled by this JVM
    */
   public final static boolean COMPRESSED_REFS_ENABLED;
 
-  /** 
-   * Number of bytes this JVM uses to represent an object reference. 
+  /**
+   * Number of bytes this JVM uses to represent an object reference.
    */
   public final static int NUM_BYTES_OBJECT_REF;
 
@@ -83,10 +123,10 @@ public final class RamUsageEstimator {
    * Number of bytes to represent an array header (no content, but with alignments).
    */
   public final static int NUM_BYTES_ARRAY_HEADER;
-  
+
   /**
    * A constant specifying the object alignment boundary inside the JVM. Objects will
-   * always take a full multiple of this constant, possibly wasting some space. 
+   * always take a full multiple of this constant, possibly wasting some space.
    */
   public final static int NUM_BYTES_OBJECT_ALIGNMENT;
 
@@ -95,14 +135,14 @@ public final class RamUsageEstimator {
    */
   private static final Map<Class<?>,Integer> primitiveSizes = new IdentityHashMap<>();
   static {
-    primitiveSizes.put(boolean.class, Integer.valueOf(NUM_BYTES_BOOLEAN));
-    primitiveSizes.put(byte.class, Integer.valueOf(NUM_BYTES_BYTE));
-    primitiveSizes.put(char.class, Integer.valueOf(NUM_BYTES_CHAR));
-    primitiveSizes.put(short.class, Integer.valueOf(NUM_BYTES_SHORT));
-    primitiveSizes.put(int.class, Integer.valueOf(NUM_BYTES_INT));
-    primitiveSizes.put(float.class, Integer.valueOf(NUM_BYTES_FLOAT));
-    primitiveSizes.put(double.class, Integer.valueOf(NUM_BYTES_DOUBLE));
-    primitiveSizes.put(long.class, Integer.valueOf(NUM_BYTES_LONG));
+    primitiveSizes.put(boolean.class, 1);
+    primitiveSizes.put(byte.class, 1);
+    primitiveSizes.put(char.class, Integer.valueOf(Character.BYTES));
+    primitiveSizes.put(short.class, Integer.valueOf(Short.BYTES));
+    primitiveSizes.put(int.class, Integer.valueOf(Integer.BYTES));
+    primitiveSizes.put(float.class, Integer.valueOf(Float.BYTES));
+    primitiveSizes.put(double.class, Integer.valueOf(Double.BYTES));
+    primitiveSizes.put(long.class, Integer.valueOf(Long.BYTES));
   }
 
   /**
@@ -110,17 +150,17 @@ public final class RamUsageEstimator {
    */
   static final long LONG_CACHE_MIN_VALUE, LONG_CACHE_MAX_VALUE;
   static final int LONG_SIZE;
-  
+
   /** For testing only */
   static final boolean JVM_IS_HOTSPOT_64BIT;
-  
+
   static final String MANAGEMENT_FACTORY_CLASS = "java.lang.management.ManagementFactory";
   static final String HOTSPOT_BEAN_CLASS = "com.sun.management.HotSpotDiagnosticMXBean";
 
   /**
-   * Initialize constants and try to collect information about the JVM internals. 
+   * Initialize constants and try to collect information about the JVM internals.
    */
-  static {    
+  static {
     if (Constants.JRE_IS_64BIT) {
       // Try to get compressed oops and object alignment (the default seems to be 8 on Hotspot);
       // (this only works on 64 bit, on 32 bits the alignment and reference size is fixed):
@@ -132,15 +172,15 @@ public final class RamUsageEstimator {
         // we use reflection for this, because the management factory is not part
         // of Java 8's compact profile:
         final Object hotSpotBean = Class.forName(MANAGEMENT_FACTORY_CLASS)
-          .getMethod("getPlatformMXBean", Class.class)
-          .invoke(null, beanClazz);
+                .getMethod("getPlatformMXBean", Class.class)
+                .invoke(null, beanClazz);
         if (hotSpotBean != null) {
           isHotspot = true;
           final Method getVMOptionMethod = beanClazz.getMethod("getVMOption", String.class);
           try {
             final Object vmOption = getVMOptionMethod.invoke(hotSpotBean, "UseCompressedOops");
             compressedOops = Boolean.parseBoolean(
-                vmOption.getClass().getMethod("getValue").invoke(vmOption).toString()
+                    vmOption.getClass().getMethod("getValue").invoke(vmOption).toString()
             );
           } catch (ReflectiveOperationException | RuntimeException | NoClassDefFoundError e) {
             isHotspot = false;
@@ -148,7 +188,7 @@ public final class RamUsageEstimator {
           try {
             final Object vmOption = getVMOptionMethod.invoke(hotSpotBean, "ObjectAlignmentInBytes");
             objectAlignment = Integer.parseInt(
-                vmOption.getClass().getMethod("getValue").invoke(vmOption).toString()
+                    vmOption.getClass().getMethod("getValue").invoke(vmOption).toString()
             );
           } catch (ReflectiveOperationException | RuntimeException | NoClassDefFoundError e) {
             isHotspot = false;
@@ -165,7 +205,7 @@ public final class RamUsageEstimator {
       // "best guess" based on reference size:
       NUM_BYTES_OBJECT_HEADER = 8 + NUM_BYTES_OBJECT_REF;
       // array header is NUM_BYTES_OBJECT_HEADER + NUM_BYTES_INT, but aligned (object alignment):
-      NUM_BYTES_ARRAY_HEADER = (int) alignObjectSize(NUM_BYTES_OBJECT_HEADER + NUM_BYTES_INT);
+      NUM_BYTES_ARRAY_HEADER = (int) alignObjectSize(NUM_BYTES_OBJECT_HEADER + Integer.BYTES);
     } else {
       JVM_IS_HOTSPOT_64BIT = false;
       COMPRESSED_REFS_ENABLED = false;
@@ -173,27 +213,27 @@ public final class RamUsageEstimator {
       NUM_BYTES_OBJECT_REF = 4;
       NUM_BYTES_OBJECT_HEADER = 8;
       // For 32 bit JVMs, no extra alignment of array header:
-      NUM_BYTES_ARRAY_HEADER = NUM_BYTES_OBJECT_HEADER + NUM_BYTES_INT;
+      NUM_BYTES_ARRAY_HEADER = NUM_BYTES_OBJECT_HEADER + Integer.BYTES;
     }
 
     // get min/max value of cached Long class instances:
     long longCacheMinValue = 0;
     while (longCacheMinValue > Long.MIN_VALUE
-        && Long.valueOf(longCacheMinValue - 1) == Long.valueOf(longCacheMinValue - 1)) {
+            && Long.valueOf(longCacheMinValue - 1) == Long.valueOf(longCacheMinValue - 1)) {
       longCacheMinValue -= 1;
     }
     long longCacheMaxValue = -1;
     while (longCacheMaxValue < Long.MAX_VALUE
-        && Long.valueOf(longCacheMaxValue + 1) == Long.valueOf(longCacheMaxValue + 1)) {
+            && Long.valueOf(longCacheMaxValue + 1) == Long.valueOf(longCacheMaxValue + 1)) {
       longCacheMaxValue += 1;
     }
     LONG_CACHE_MIN_VALUE = longCacheMinValue;
     LONG_CACHE_MAX_VALUE = longCacheMaxValue;
     LONG_SIZE = (int) shallowSizeOfInstance(Long.class);
   }
-  
-  /** 
-   * Aligns an object size to be the next multiple of {@link #NUM_BYTES_OBJECT_ALIGNMENT}. 
+
+  /**
+   * Aligns an object size to be the next multiple of {@link #NUM_BYTES_OBJECT_ALIGNMENT}.
    */
   public static long alignObjectSize(long size) {
     size += (long) NUM_BYTES_OBJECT_ALIGNMENT - 1L;
@@ -215,40 +255,40 @@ public final class RamUsageEstimator {
   public static long sizeOf(byte[] arr) {
     return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + arr.length);
   }
-  
+
   /** Returns the size in bytes of the boolean[] object. */
   public static long sizeOf(boolean[] arr) {
     return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + arr.length);
   }
-  
+
   /** Returns the size in bytes of the char[] object. */
   public static long sizeOf(char[] arr) {
-    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_CHAR * arr.length);
+    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) Character.BYTES * arr.length);
   }
 
   /** Returns the size in bytes of the short[] object. */
   public static long sizeOf(short[] arr) {
-    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_SHORT * arr.length);
+    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) Short.BYTES * arr.length);
   }
-  
+
   /** Returns the size in bytes of the int[] object. */
   public static long sizeOf(int[] arr) {
-    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_INT * arr.length);
+    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) Integer.BYTES * arr.length);
   }
-  
+
   /** Returns the size in bytes of the float[] object. */
   public static long sizeOf(float[] arr) {
-    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_FLOAT * arr.length);
+    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) Float.BYTES * arr.length);
   }
-  
+
   /** Returns the size in bytes of the long[] object. */
   public static long sizeOf(long[] arr) {
-    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_LONG * arr.length);
+    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) Long.BYTES * arr.length);
   }
-  
+
   /** Returns the size in bytes of the double[] object. */
   public static long sizeOf(double[] arr) {
-    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_DOUBLE * arr.length);
+    return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) Double.BYTES * arr.length);
   }
 
   /** Returns the shallow size in bytes of the Object[] object. */
@@ -257,11 +297,11 @@ public final class RamUsageEstimator {
     return alignObjectSize((long) NUM_BYTES_ARRAY_HEADER + (long) NUM_BYTES_OBJECT_REF * arr.length);
   }
 
-  /** 
+  /**
    * Estimates a "shallow" memory usage of the given object. For arrays, this will be the
    * memory taken by array storage (no subreferences will be followed). For objects, this
    * will be the memory taken by the fields.
-   * 
+   *
    * JVM object alignments are also applied.
    */
   public static long shallowSizeOf(Object obj) {
@@ -278,7 +318,7 @@ public final class RamUsageEstimator {
    * Returns the shallow instance size in bytes an instance of the given class would occupy.
    * This works with all conventional classes and primitive types, but not with arrays
    * (the size then depends on the number of elements and varies from object to object).
-   * 
+   *
    * @see #shallowSizeOf(Object)
    * @throws IllegalArgumentException if {@code clazz} is an array class. 
    */
@@ -287,7 +327,7 @@ public final class RamUsageEstimator {
       throw new IllegalArgumentException("This method does not work with array classes.");
     if (clazz.isPrimitive())
       return primitiveSizes.get(clazz);
-    
+
     long size = NUM_BYTES_OBJECT_HEADER;
 
     // Walk type hierarchy
@@ -305,7 +345,7 @@ public final class RamUsageEstimator {
         }
       }
     }
-    return alignObjectSize(size);    
+    return alignObjectSize(size);
   }
 
   /**
@@ -328,7 +368,7 @@ public final class RamUsageEstimator {
   /**
    * This method returns the maximum representation size of an object. <code>sizeSoFar</code>
    * is the object's size measured so far. <code>f</code> is the field being probed.
-   * 
+   *
    * <p>The returned offset will be the maximum of whatever was measured so far and 
    * <code>f</code> field's offset and representation size (unaligned).
    */
@@ -343,8 +383,8 @@ public final class RamUsageEstimator {
    * Returns <code>size</code> in human-readable units (GB, MB, KB or bytes).
    */
   public static String humanReadableUnits(long bytes) {
-    return humanReadableUnits(bytes, 
-        new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT)));
+    return humanReadableUnits(bytes,
+            new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT)));
   }
 
   /**
