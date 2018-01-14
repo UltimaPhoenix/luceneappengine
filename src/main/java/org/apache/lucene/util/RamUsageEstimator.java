@@ -320,7 +320,7 @@ public final class RamUsageEstimator {
    * (the size then depends on the number of elements and varies from object to object).
    *
    * @see #shallowSizeOf(Object)
-   * @throws IllegalArgumentException if {@code clazz} is an array class. 
+   * @throws IllegalArgumentException if {@code clazz} is an array class.
    */
   public static long shallowSizeOfInstance(Class<?> clazz) {
     if (clazz.isArray())
@@ -369,7 +369,7 @@ public final class RamUsageEstimator {
    * This method returns the maximum representation size of an object. <code>sizeSoFar</code>
    * is the object's size measured so far. <code>f</code> is the field being probed.
    *
-   * <p>The returned offset will be the maximum of whatever was measured so far and 
+   * <p>The returned offset will be the maximum of whatever was measured so far and
    * <code>f</code> field's offset and representation size (unaligned).
    */
   static long adjustForField(long sizeSoFar, final Field f) {
@@ -388,7 +388,7 @@ public final class RamUsageEstimator {
   }
 
   /**
-   * Returns <code>size</code> in human-readable units (GB, MB, KB or bytes). 
+   * Returns <code>size</code> in human-readable units (GB, MB, KB or bytes).
    */
   public static String humanReadableUnits(long bytes, DecimalFormat df) {
     if (bytes / ONE_GB > 0) {
