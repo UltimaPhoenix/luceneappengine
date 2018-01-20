@@ -40,6 +40,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 21-01-2018 completed development of LAE 4.1.0 and LUCENE 7.2.0
   * 13-11-2017 completed development of LAE 4.0.0 and LUCENE 7.1.0
   * 28-06-2017 Today Google completed the long standing [feature request for Servlet 3 and Java 8](https://issuetracker.google.com/issues/35887151) and I'm happy to start to adapt Lucene 6 to the new [beta standard environment Java 8 powered](https://cloudplatform.googleblog.com/2017/06/Google-App-Engine-standard-now-supports-Java-8.html)
   * 23-07-2016 Unfortunately Lucene 6 need Java 8 and AppEngine standard environment only supports Java 7
