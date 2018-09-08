@@ -63,6 +63,7 @@ public class GaeDirectory extends BaseDirectory {
 	final Key<LuceneIndex> indexKey;
 	
 	static {
+		ObjectifyService.init();
 		ObjectifyService.register(com.googlecode.luceneappengine.GaeLock.class);
 		ObjectifyService.register(com.googlecode.luceneappengine.LuceneIndex.class);
 		ObjectifyService.register(com.googlecode.luceneappengine.Segment.class);

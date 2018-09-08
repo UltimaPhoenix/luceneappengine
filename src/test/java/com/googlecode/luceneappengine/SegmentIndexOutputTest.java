@@ -1,5 +1,6 @@
 package com.googlecode.luceneappengine;
 
+import com.googlecode.objectify.ObjectifyService;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.codecs.CodecUtil;
 import org.apache.lucene.store.BufferedChecksumIndexInput;
@@ -12,25 +13,36 @@ import java.io.IOException;
 import static org.junit.Assert.fail;
 
 public class SegmentIndexOutputTest extends LocalDatastoreTest {
-    
+
     @Test
     public void testGetChecksum_NoFlush() throws IOException {
+        ObjectifyService.run(() -> {
+            try {
+                oldTestGetChecksum_NoFlush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
+    }
+
+    public void oldTestGetChecksum_NoFlush() throws IOException {
         final String input1 = "Hello World!";
         final String input2 = "Hello World second string!";
         final String segmentName = "segments.gen";//main segment name
-        
+
         try (Directory directory = new GaeDirectory()) {
             try (IndexOutput createOutput = directory.createOutput(segmentName, null)) {
                 createOutput.writeBytes(input1.getBytes(), 0, input1.getBytes().length);
                 CodecUtil.writeFooter(createOutput);
             }
-            
+
             try (IndexOutput createOutput = directory.createOutput(segmentName, null)) {
                 createOutput.writeBytes(input2.getBytes(), 0, input2.getBytes().length);
                 createOutput.writeBytes(input2.getBytes(), 0, input2.getBytes().length);
                 CodecUtil.writeFooter(createOutput);
             }
-            
+
             try (BufferedChecksumIndexInput bcii = new BufferedChecksumIndexInput(directory.openInput(segmentName, null))) {
                 bcii.readBytes(new byte[input2.getBytes().length], 0, input2.getBytes().length);
                 bcii.readBytes(new byte[input2.getBytes().length], 0, input2.getBytes().length);

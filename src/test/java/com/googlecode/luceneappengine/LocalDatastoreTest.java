@@ -14,18 +14,19 @@ public abstract class LocalDatastoreTest {
 
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig().setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
-    Closeable ofyContext;
+//    Closeable ofyContext;
     
     @Before
     public void setUp() {
         helper.setUp();
-        ofyContext = ObjectifyService.begin();
-        ofy().clear();
+        ObjectifyService.init();
+//        ofyContext = ObjectifyService.begin();
+//        ofy().clear();
     }
 
     @After
     public void tearDown() {
-    	ofyContext.close();
+//    	ofyContext.close();
         helper.tearDown();
     }
 }
