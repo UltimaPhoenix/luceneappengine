@@ -9,7 +9,7 @@ Live Demo:
  * See it in action ([live demo site](https://bigtable-lucene.appspot.com)) or check the [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
 
 Main Features:
-  * LAE 4.2.x compatible with Lucene 7.3.x, 7.4.x
+  * LAE 4.2.x compatible with Lucene 7.3.x, 7.4.x, 7.5.x
   * LAE 4.1.x compatible with Lucene 7.1.x, 7.2.x
   * LAE 4.0.x compatible with Lucene 7.0.x (**needs Java 8**, I will not say it anymore)
   * LAE 3.4.x compatible with Lucene 5.5.x
@@ -42,7 +42,8 @@ Coming Soon:
   * buffer management
 
 ## News
-  * 14-06-2018 released LAE 4.2.0
+  * 23-09-2019 tested LAE 4.2.0 with LUCENE 7.5.0
+  * 14-06-2018 released LAE 4.2.0 to support LUCENE 7.4.0
   * 12-06-2018 released LAE 4.0.0 and 4.1.0 to maven central
   * 19-05-2018 tested LAE 4.1.0 with LUCENE 7.3.1
   * 14-04-2018 tested LAE 4.1.0 with LUCENE 7.3.0

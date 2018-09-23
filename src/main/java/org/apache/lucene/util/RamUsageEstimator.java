@@ -320,7 +320,7 @@ public final class RamUsageEstimator {
    * (the size then depends on the number of elements and varies from object to object).
    *
    * @see #shallowSizeOf(Object)
-   * @throws IllegalArgumentException if {@code clazz} is an array class. 
+   * @throws IllegalArgumentException if {@code clazz} is an array class.
    */
   public static long shallowSizeOfInstance(Class<?> clazz) {
     if (clazz.isArray())
