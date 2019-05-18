@@ -41,13 +41,6 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
 	@DataPoints
 	@SuppressWarnings("deprecation")//try backward compatibility
     public static final Version[] LUCENE_TEST_VERSIONS = new Version[] {
-		Version.LUCENE_6_0_0, Version.LUCENE_6_0_1,
-        Version.LUCENE_6_1_0,
-        Version.LUCENE_6_2_0, Version.LUCENE_6_2_1,
-        Version.LUCENE_6_3_0,
-        Version.LUCENE_6_4_0, Version.LUCENE_6_4_1, Version.LUCENE_6_4_2,
-        Version.LUCENE_6_5_0, Version.LUCENE_6_5_1,
-        Version.LUCENE_6_6_0, Version.LUCENE_6_6_1,
         Version.LUCENE_7_0_0, Version.LUCENE_7_0_1,
         Version.LUCENE_7_1_0,
         Version.LUCENE_7_2_0,
@@ -56,6 +49,7 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         Version.LUCENE_7_5_0,
         Version.LUCENE_7_6_0,
         Version.LUCENE_7_7_0, Version.LUCENE_7_7_1,
+        Version.LUCENE_8_0_0,
 		Version.LUCENE_CURRENT,
 		Version.LATEST
 	};
@@ -184,7 +178,7 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
                 queryParser.setAllowLeadingWildcard(true);
                 Query q = queryParser.parse(query);
 				IndexSearcher searcher = new IndexSearcher(reader);
-				TopScoreDocCollector collector = TopScoreDocCollector.create(100);
+				TopScoreDocCollector collector = TopScoreDocCollector.create(100, 100);
 				searcher.search(q, collector);
 
 				ScoreDoc[] hits = collector.topDocs(0, 100).scoreDocs;
@@ -201,7 +195,7 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
     private static CustomAnalyzer customAnalyzer() throws IOException {
         return CustomAnalyzer.builder()
                 .withTokenizer("standard")
-                .addTokenFilter("standard")
+                .addTokenFilter("classic")
                 .addTokenFilter("lowercase")
                 .addTokenFilter("stop")
                 .addTokenFilter("snowballporter")
