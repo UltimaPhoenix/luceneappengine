@@ -3,10 +3,7 @@ package com.googlecode.luceneappengine;
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.lucene.store.BaseDirectory;
 import org.apache.lucene.store.Directory;
@@ -168,6 +165,12 @@ public class GaeDirectory extends BaseDirectory {
 	    isOpen = false;
 		//TODO: refactor for caching. Doh! There's something to do!
 	}
+
+	@Override
+	public Set<String> getPendingDeletions() {
+		return Collections.emptySet();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.apache.lucene.store.Directory#openInput(java.lang.String, org.apache.lucene.store.IOContext)
