@@ -42,6 +42,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 23-06-2019 released LAE 4.3.0 to support LUCENE 8.1.0
   * 09-06-2019 tested LAE 4.2.0 with LUCENE 7.7.2
   * 15-05-2019 tested LAE 4.2.0 with LUCENE 8.0.0
   * 02-03-2019 tested LAE 4.2.0 with LUCENE 7.7.1
