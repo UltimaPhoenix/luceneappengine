@@ -3,6 +3,7 @@
 # All dotfiles #
 .*
 !.gitignore
+!.mvn
 
 # Package Files #
 *.jar
