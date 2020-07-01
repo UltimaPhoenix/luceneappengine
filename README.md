@@ -3,7 +3,7 @@ LuceneAppEngine (aka LAE) [![Build Status](https://travis-ci.org/UltimaPhoenix/l
 
 This project provides a directory useful to build Lucene and Google App Engine powered applications.
 
-![https://lucene.apache.org/images/lucene_logo_green_300.png](https://lucene.apache.org/images/lucene_logo_green_300.png) ![https://www.google.com/accounts/ah/appengine.jpg](https://www.google.com/accounts/ah/appengine.jpg)
+![https://lucene.apache.org/theme/images/lucene/lucene_logo_green_300.png](https://lucene.apache.org/theme/images/lucene/lucene_logo_green_300.png) ![https://www.google.com/accounts/ah/appengine.jpg](https://www.google.com/accounts/ah/appengine.jpg)
 
 Live Demo:
  * See it in action ([live demo site](https://bigtable-lucene.appspot.com)) or check the [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
