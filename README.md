@@ -51,7 +51,7 @@ Coming Soon:
   * 12-01-2020 tested LAE 4.4.0 with LUCENE 8.4.0
   * 08-12-2019 tested LAE 4.4.0 with LUCENE 8.3.1
   * 07-11-2019 tested LAE 4.4.0 with LUCENE 8.3.0
-  * 10-08-2020 completed LAE 4.4.x to support Lucene 8.2.x
+  * 10-08-2019 completed LAE 4.4.x to support Lucene 8.2.x
   * 07-07-2019 tested LAE 4.3.0 with LUCENE 8.1.1
   * 23-06-2019 released LAE 4.3.0 to support LUCENE 8.1.0
   * 09-06-2019 tested LAE 4.2.0 with LUCENE 7.7.2
