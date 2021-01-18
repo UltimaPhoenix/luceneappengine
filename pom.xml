@@ -286,7 +286,7 @@
 		<license.includedGroups>org.apache.lucene</license.includedGroups>
 		<license.includedArtifacts>lucene-core</license.includedArtifacts>
 
-		<objectify.version>5.1.22</objectify.version>
+		<objectify.version>6.0.7</objectify.version>
 		<lucene.version>8.5.2</lucene.version>
 
 		<slf4j.version>1.7.13</slf4j.version>
