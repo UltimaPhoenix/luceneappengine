@@ -256,8 +256,8 @@
 			</plugin>
 			<!-- Type "mvn appengine:devserver" to run and "mvn appengine:update" to upload to GAE. -->
 			<plugin>
-				<groupId>com.google.appengine</groupId>
-                <artifactId>appengine-maven-plugin</artifactId>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${gae.plugin.version}</version>
 				<configuration>
 				    <enableJarClasses>true</enableJarClasses>
@@ -291,8 +291,8 @@
 
 		<slf4j.version>1.7.13</slf4j.version>
 
-		<gae.plugin.version>1.9.88</gae.plugin.version>
 		<gae.version>1.9.88</gae.version>
+		<gae.plugin.version>2.4.0</gae.plugin.version>
 		<gae.application.name>${repository.project.name}</gae.application.name>
 		<gae.application.version>test</gae.application.version>
 		<gae.serverId>${repository.project.name}</gae.serverId>
