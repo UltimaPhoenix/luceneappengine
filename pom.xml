@@ -203,8 +203,8 @@
 				</executions>
 				<configuration>
 					<links>
-						<link>https://lucene.apache.org/core/8_7_0/core</link>
-						<link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
+						<link>https://javadoc.io/doc/org.apache.lucene/lucene-core/8.9.0/</link>
+						<link>https://javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22/</link>
 					</links>
 					<excludePackageNames>org.apache.lucene.*</excludePackageNames>
 				</configuration>
@@ -442,8 +442,8 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <links>
-                        <link>https://lucene.apache.org/core/8_7_0/core</link>
-                        <link>https://objectify-appengine.googlecode.com/svn/trunk/javadoc</link>
+						<link>https://javadoc.io/doc/org.apache.lucene/lucene-core/8.9.0/</link>
+						<link>https://javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22/</link>
                     </links>
                     <excludePackageNames>org.apache.lucene.*</excludePackageNames>
                 </configuration>
