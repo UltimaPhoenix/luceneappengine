@@ -54,7 +54,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
@@ -70,7 +70,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
@@ -94,7 +94,7 @@
 				</plugin>
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.8</version>
+                    <version>3.0.0</version>
                 </plugin>
 				<plugin>
 				    <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -210,9 +210,8 @@
 				</configuration>
 			</plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -277,7 +276,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<argLine>-Xmx512m</argLine>
-		<wagon.scm.version>3.4.1</wagon.scm.version>
+		<wagon.scm.version>3.4.2</wagon.scm.version>
 		<wagon.scm.provider.version>1.11.2</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
 
@@ -291,7 +290,7 @@
 
 		<slf4j.version>1.7.13</slf4j.version>
 
-		<gae.plugin.version>2.4.0</gae.plugin.version>
+		<gae.plugin.version>2.4.1</gae.plugin.version>
 		<gae.version>1.9.90</gae.version>
 		<gae.application.name>${repository.project.name}</gae.application.name>
 		<gae.application.version>test</gae.application.version>
