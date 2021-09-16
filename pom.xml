@@ -277,7 +277,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<argLine>-Xmx512m</argLine>
 		<wagon.scm.version>3.4.2</wagon.scm.version>
-		<wagon.scm.provider.version>1.11.2</wagon.scm.provider.version>
+		<wagon.scm.provider.version>1.12.0</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
 
 		<license.licenseName>apache_v2</license.licenseName>
