@@ -45,6 +45,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 27-11-2021 tested LAE 4.5.1 with LUCENE 8.11.0
   * 04-10-2021 tested LAE 4.5.1 with LUCENE 8.10.0
   * 08-08-2021 released LAE 4.5.1 with LUCENE 8.9.0
   * 03-07-2021 tested LAE 4.5.0 with LUCENE 8.9.0
