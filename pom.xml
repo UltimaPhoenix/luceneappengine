@@ -288,7 +288,7 @@
 		<objectify.version>5.1.22</objectify.version>
 		<lucene.version>8.9.0</lucene.version>
 
-		<slf4j.version>1.7.13</slf4j.version>
+		<slf4j.version>1.7.36</slf4j.version>
 
 		<gae.plugin.version>2.4.1</gae.plugin.version>
 		<gae.version>1.9.90</gae.version>
