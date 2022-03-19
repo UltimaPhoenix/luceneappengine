@@ -41,14 +41,6 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
 	@DataPoints
 	@SuppressWarnings("deprecation")//try backward compatibility
     public static final Version[] LUCENE_TEST_VERSIONS = new Version[] {
-        Version.LUCENE_7_0_0, Version.LUCENE_7_0_1,
-        Version.LUCENE_7_1_0,
-        Version.LUCENE_7_2_0,
-        Version.LUCENE_7_3_0, Version.LUCENE_7_3_1,
-        Version.LUCENE_7_4_0,
-        Version.LUCENE_7_5_0,
-        Version.LUCENE_7_6_0,
-        Version.LUCENE_7_7_0, Version.LUCENE_7_7_1,
         Version.LUCENE_8_0_0,
         Version.LUCENE_8_1_0, Version.LUCENE_8_1_1,
         Version.LUCENE_8_2_0,
@@ -58,8 +50,9 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         Version.LUCENE_8_6_0, Version.LUCENE_8_6_1, Version.LUCENE_8_6_2, Version.LUCENE_8_6_3,
         Version.LUCENE_8_7_0,
         Version.LUCENE_8_8_0, Version.LUCENE_8_8_1, Version.LUCENE_8_8_2,
-        Version.LUCENE_8_9_0, Version.LUCENE_8_10_0, Version.LUCENE_8_10_1, Version.LUCENE_8_11_0, Version.LUCENE_8_11_1, Version.LUCENE_8_11_2,
-		Version.LUCENE_CURRENT,
+        Version.LUCENE_8_9_0, Version.LUCENE_8_10_0, Version.LUCENE_8_10_1, Version.LUCENE_8_11_0, // Version.LUCENE_8_11_1, Version.LUCENE_8_11_2,
+        Version.LUCENE_9_0_0,
+        Version.LUCENE_CURRENT,
 		Version.LATEST
 	};
     
