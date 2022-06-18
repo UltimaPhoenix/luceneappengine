@@ -45,6 +45,8 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 04-06-2022 LAE 5 confirmed support for Lucene 9.2
+  * 24-05-2022 LAE 5 setup is going to be simplified, confirmed support for Lucene 9.1 
   * 01-05-2022 the next LAE version is going to support AppEngine Standard Environment 17
   * 13-03-2022 started development to LUCENE 9 and Java 11 and new AppEngine Standard Environment (this is not going to be ready soon)
   * 30-01-2022 tested LAE 4.5.1 with LUCENE 8.11.2
