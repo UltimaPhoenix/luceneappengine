@@ -275,8 +275,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.compiler.release>11</maven.compiler.release>
 		<argLine>-Xmx512m</argLine>
-		<wagon.scm.version>3.5.1</wagon.scm.version>
-		<wagon.scm.provider.version>1.12.2</wagon.scm.provider.version>
+		<wagon.scm.version>3.5.2</wagon.scm.version>
+		<wagon.scm.provider.version>1.13.0</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
 
 		<license.licenseName>apache_v2</license.licenseName>
