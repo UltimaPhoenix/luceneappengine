@@ -50,7 +50,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
+					<version>3.10.1</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
@@ -66,15 +66,15 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.0.0-M1</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.4.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.9.1</version>
+					<version>3.12.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-release-plugin</artifactId>
@@ -276,8 +276,8 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<argLine>-Xmx512m</argLine>
-		<wagon.scm.version>3.4.2</wagon.scm.version>
-		<wagon.scm.provider.version>1.11.2</wagon.scm.provider.version>
+		<wagon.scm.version>3.5.2</wagon.scm.version>
+		<wagon.scm.provider.version>1.13.0</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
 
 		<license.licenseName>apache_v2</license.licenseName>
@@ -286,11 +286,11 @@
 		<license.includedArtifacts>lucene-core</license.includedArtifacts>
 
 		<objectify.version>5.1.22</objectify.version>
-		<lucene.version>8.9.0</lucene.version>
+		<lucene.version>8.11.2</lucene.version>
 
 		<slf4j.version>1.7.13</slf4j.version>
 
-		<gae.plugin.version>2.4.1</gae.plugin.version>
+		<gae.plugin.version>2.4.3</gae.plugin.version>
 		<gae.version>1.9.90</gae.version>
 		<gae.application.name>${repository.project.name}</gae.application.name>
 		<gae.application.version>test</gae.application.version>
