@@ -291,7 +291,7 @@
 		<slf4j.version>1.7.13</slf4j.version>
 
 		<gae.plugin.version>2.4.3</gae.plugin.version>
-		<gae.version>1.9.90</gae.version>
+		<gae.version>2.0.6</gae.version>
 		<gae.application.name>${repository.project.name}</gae.application.name>
 		<gae.application.version>test</gae.application.version>
 		<gae.serverId>${repository.project.name}</gae.serverId>
