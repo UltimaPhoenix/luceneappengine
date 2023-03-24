@@ -30,13 +30,13 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.*;
 
 @RunWith(Theories.class)
-public class GaeDirectoryTest extends LocalDatastoreTest {
+public class GaeDirectoryTest extends LocalFirestoreTest {
 
 	@DataPoints
 	@SuppressWarnings("deprecation")//try backward compatibility
@@ -69,12 +69,12 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
         final String input = "Hello World!";
         final String name = "_0.fmt";
 		final byte[] bs = input.getBytes();
-		
-        try (Directory directory = new GaeDirectory()) {
+
+        try (Directory directory = new GaeDirectory(laeContext)) {
     		try (IndexOutput createOutput = directory.createOutput(name, new IOContext())) {
     		    createOutput.writeBytes(bs, 0, bs.length);
     		}
-            
+
             try (IndexInput openInput = directory.openInput(name, new IOContext())) {
                 byte[] bt = new byte[bs.length];
                 openInput.readBytes(bt, 0, bt.length);
@@ -82,22 +82,22 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
             }
         }
     }
-    
+
     @Test
     public void writeAndReadStringInSegment_1Mb() throws IOException {
         final int size = 1024*1024 + 1;
         final String input = RandomStringUtils.random(size + 100, true, true);
         final String name = "_0.fmt";
-        
+
 		final byte[] bs = input.getBytes();
-		
+
 		assertTrue("Test is not ok! " + bs.length + " <= " + size, bs.length > size);//precondition
-		
-        try (Directory directory = new GaeDirectory()) {
+
+        try (Directory directory = new GaeDirectory(laeContext)) {
     		try (IndexOutput createOutput = directory.createOutput(name, new IOContext())) {
     		    createOutput.writeBytes(bs, 0, bs.length);
     		}
-            
+
             try (IndexInput openInput = directory.openInput(name, new IOContext())) {
                 byte[] bt = new byte[bs.length];
                 openInput.readBytes(bt, 0, bt.length);
@@ -105,49 +105,49 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
             }
         }
     }
-    
+
     @Theory
     public void writeAndReadDocumentInDirectory(Version luceneVersion) throws IOException {
         final String input = "Hello World!";
-        
-        try (Directory directory = new GaeDirectory()) {
-            
+
+        try (Directory directory = new GaeDirectory(laeContext)) {
+
             try (IndexWriter writer = new IndexWriter(directory, config())) {
                 Document document = new Document();
                 document.add(new Field("title", input, TextField.TYPE_STORED));
                 writer.addDocument(document);
             }
-            
+
             try (IndexReader reader = DirectoryReader.open(directory)) {
-                Document doc = reader.document(0); 
+                Document doc = reader.document(0);
                 assertEquals(doc.get("title"), input);
             }
         }
     }
-    
+
     @Theory
     public void writeAndReadMoreDocumentInDirectory(Version luceneVersion) throws IOException {
         final String input1 = "Hello World!";
         final String input2 = "Hello World!";
 
         final CustomAnalyzer analyzer = customAnalyzer();
-        try (Directory directory = new GaeDirectory()) {
-            
+        try (Directory directory = new GaeDirectory(laeContext)) {
+
             try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
                 Document document = new Document();
                 document.add(new Field("title", input1, TextField.TYPE_STORED));
                 writer.addDocument(document);
             }
-            
+
             try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
                 Document document = new Document();
                 document.add(new Field("title", input2, TextField.TYPE_STORED));
                 writer.addDocument(document);
             }
-            
+
             try (IndexReader reader = DirectoryReader.open(directory)) {
-                Document doc1 = reader.document(0); 
-                Document doc2 = reader.document(1); 
+                Document doc1 = reader.document(0);
+                Document doc2 = reader.document(1);
                 assertEquals(doc1.get("title"), input1);
                 assertEquals(doc2.get("title"), input2);
             }
@@ -160,14 +160,14 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
     	final String input2 = "Helllo World!";
 
         CustomAnalyzer analyzer = customAnalyzer();
-        try (Directory directory = new GaeDirectory()) {
-    		
+        try (Directory directory = new GaeDirectory(laeContext)) {
+
     		try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
     			Document document = new Document();
     			document.add(new Field("title", input1, TextField.TYPE_STORED));
     			writer.addDocument(document);
     		}
-    		
+
     		try (IndexWriter writer = new IndexWriter(directory, config(analyzer))) {
     			Document document = new Document();
     			document.add(new Field("title", input2, TextField.TYPE_STORED));
@@ -185,9 +185,9 @@ public class GaeDirectoryTest extends LocalDatastoreTest {
 
 				ScoreDoc[] hits = collector.topDocs(0, 100).scoreDocs;
 				assertThat(hits.length, equalTo(2));
-				
-    			Document doc1 = searcher.doc(hits[0].doc); 
-    			Document doc2 = searcher.doc(hits[1].doc); 
+
+    			Document doc1 = searcher.doc(hits[0].doc);
+    			Document doc2 = searcher.doc(hits[1].doc);
     			assertEquals(doc1.get("title"), input1);
     			assertEquals(doc2.get("title"), input2);
     		}

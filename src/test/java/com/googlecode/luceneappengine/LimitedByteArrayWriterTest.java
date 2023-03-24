@@ -16,6 +16,7 @@ public class LimitedByteArrayWriterTest {
 	
 	@Test
 	public void testWriteByte_IllegalArgument() throws IOException {
+		
 		/* in */
 		final byte[] input = {0};
 		final byte maxAllowedSize = 0;
