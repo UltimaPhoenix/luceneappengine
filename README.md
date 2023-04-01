@@ -45,6 +45,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 01-04-2023 Existing examples and wiki will be completely deprecated 
   * 11-03-2023 LAE 5 will use the new google cloud infrastructure and firestore
   * 04-02-2023 LAE 5 objectify dependency is going to be removed
   * 07-01-2023 LAE 5 breaking changes confirmed
