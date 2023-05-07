@@ -53,7 +53,7 @@ final class GaeLockFactory extends LockFactory {
 				GaeLock gaeLock = t.get(lockRef).get().toObject(GaeLock.class);
 				if (gaeLock == null) {
 					log.trace("Creating new Lock '{}.{}'.", index, lockName);
-					gaeLock = new GaeLock(index, lockName);
+					gaeLock = new GaeLock(lockName);
 				}
 				if (gaeLock.locked) {
 					log.debug("Cannot lock Lock '{}.{}'.", index, lockName);

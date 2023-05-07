@@ -33,8 +33,7 @@ public final class GaeLock implements FireStoreEntity {
 
 	public boolean locked;
 	
-	public GaeLock(LuceneIndex index, String name) {
-//		this.index = index;
+	public GaeLock(String name) {
 		this.name = name;
 	}
 
