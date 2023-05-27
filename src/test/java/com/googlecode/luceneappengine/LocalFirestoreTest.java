@@ -2,7 +2,6 @@ package com.googlecode.luceneappengine;
 
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
-import com.googlecode.luceneappengine.firestore.FirestoreCollectionMapper;
 import com.googlecode.luceneappengine.model.repository.LaeContext;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,14 +21,14 @@ public abstract class LocalFirestoreTest {
 
     protected static final LaeContext laeContext = new LaeContext(firestore);
 
-    @BeforeClass
-    public static void setUpOnce() throws IOException, InterruptedException {
-
-    }
-
-    @AfterClass
-    public static void tearDownOnce() throws IOException, InterruptedException, TimeoutException {
-    }
+//    @BeforeClass
+//    public static void setUpOnce() throws IOException, InterruptedException {
+//
+//    }
+//
+//    @AfterClass
+//    public static void tearDownOnce() throws IOException, InterruptedException, TimeoutException {
+//    }
 
     @Before
     public void setUp() throws IOException, InterruptedException {
