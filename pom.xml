@@ -365,11 +365,6 @@
 			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.googlecode.objectify</groupId>-->
-<!--			<artifactId>objectify</artifactId>-->
-<!--			<version>${objectify.version}</version>-->
-<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
