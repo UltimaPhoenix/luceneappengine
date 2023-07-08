@@ -309,7 +309,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.compiler.release>17</maven.compiler.release>
 		<maven.compiler.source>17</maven.compiler.source>
-<!--		<argLine>-Xmx512m</argLine>-->
 		<wagon.scm.version>3.5.2</wagon.scm.version>
 		<wagon.scm.provider.version>1.13.0</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
