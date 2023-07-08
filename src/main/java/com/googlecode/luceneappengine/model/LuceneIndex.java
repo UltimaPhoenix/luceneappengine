@@ -1,9 +1,11 @@
 package com.googlecode.luceneappengine.model;
 
 import com.google.cloud.firestore.annotation.DocumentId;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Objects;
 
@@ -19,6 +21,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public final class LuceneIndex implements FireStoreEntity {
 
 	@DocumentId
