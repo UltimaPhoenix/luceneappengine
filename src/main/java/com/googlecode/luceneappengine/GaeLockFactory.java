@@ -1,21 +1,17 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import org.apache.lucene.store.AlreadyClosedException;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.Lock;
-import org.apache.lucene.store.LockFactory;
-import org.apache.lucene.store.LockObtainFailedException;
-import org.apache.lucene.store.LockReleaseFailedException;
+import com.google.cloud.firestore.DocumentReference;
+import com.googlecode.luceneappengine.model.GaeLock;
+import com.googlecode.luceneappengine.model.LuceneIndex;
+import com.googlecode.luceneappengine.model.repository.LaeContext;
+import org.apache.lucene.store.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Work;
 
 /**
  * Class used as {@link LockFactory} for any {@link GaeDirectory}.
@@ -28,19 +24,10 @@ final class GaeLockFactory extends LockFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(GaeLockFactory.class);
 
-	private GaeLockFactory() {/* singleton */}
+	private final LaeContext laeContext;
 
-	/**
-	 * Return a new {@link GaeLockFactory} specific for the index.
-	 * 
-	 * @return A {@link GaeLockFactory} for this index
-	 */
-	public static GaeLockFactory getInstance() {
-		return GaeLockFactoryHolder.INSTANCE;
-	}
-	
-	private static class GaeLockFactoryHolder {
-		private static final GaeLockFactory INSTANCE = new GaeLockFactory();
+	public GaeLockFactory(LaeContext laeContext) {
+		this.laeContext = laeContext;
 	}
 
 	/*
@@ -53,64 +40,69 @@ final class GaeLockFactory extends LockFactory {
 		if (!(dir instanceof GaeDirectory)) {
 	      throw new UnsupportedOperationException(getClass().getSimpleName() + " can only be used with GaeDirectory subclasses, got: " + dir);
 	    }
-		final Key<LuceneIndex> indexKey = ((GaeDirectory) dir).indexKey;
+		final LuceneIndex index = ((GaeDirectory) dir).index;
+		final DocumentReference lockRef = laeContext.firestore
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+				.document(index.getName())
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(GaeLock.class))
+				.document(lockName);
 		boolean obtainedLock;
 		try {
-			obtainedLock = ofy().transactNew(new Work<Boolean>() {
-				@Override
-				public Boolean run() {
-					final boolean obtained;
-					GaeLock gaeLock = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
-					if (gaeLock == null) {
-						log.trace("Creating new Lock '{}.{}'.", indexKey, lockName);
-						gaeLock = new GaeLock(indexKey, lockName);
-					}
-					if (gaeLock.locked) {
-						log.debug("Cannot lock Lock '{}.{}'.", indexKey, lockName);
-						obtained = false;
-					} else {
-						log.debug("Locking Lock '{}.{}'.", indexKey, lockName);
-						gaeLock.locked = true;
-						ofy().save().entity(gaeLock).now();
-						obtained = true;
-					}
-					return obtained;
+			obtainedLock = laeContext.firestore.runTransaction(t -> {
+				final boolean obtained;
+				GaeLock gaeLock = t.get(lockRef).get().toObject(GaeLock.class);
+				if (gaeLock == null) {
+					log.trace("Creating new Lock '{}.{}'.", index, lockName);
+					gaeLock = new GaeLock(lockName);
 				}
-			});
-		} catch (RuntimeException e) {
+				if (gaeLock.locked) {
+					log.debug("Cannot lock Lock '{}.{}'.", index, lockName);
+					obtained = false;
+				} else {
+					log.debug("Locking Lock '{}.{}'.", index, lockName);
+					gaeLock.locked = true;
+					t.set(lockRef, gaeLock);
+					obtained = true;
+				}
+				return obtained;
+			}).get();
+		} catch (RuntimeException | ExecutionException e) {
 			log.error("Error obtaining lock:{} error:{}", lockName, e.getMessage(), e);
+			throw new LockObtainFailedException("Error obtaining lock:" + lockName, e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new LockObtainFailedException("Error obtaining lock:" + lockName, e);
 		}
 		if (!obtainedLock) {
-			throw new LockObtainFailedException("Cannot lock Lock " + indexKey + "." + lockName);
+			throw new LockObtainFailedException("Cannot lock Lock " + index.getName() + "." + lockName);
 		}
-		
+
 		return new Lock() {
 			boolean closed;
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.apache.lucene.store.Lock#close()
 			 */
 			@Override
 			public void close() throws LockReleaseFailedException {
 				try {
-					ofy().transactNew(3, new Work<Void>() {
-						@Override
-						public Void run() {
-							final GaeLock gaeLock = ofy().load().key(Key.create(indexKey, GaeLock.class, lockName)).now();
-							if (gaeLock != null && gaeLock.locked) {
-								log.debug("Unlocking Lock '{}'.", lockName);
-								gaeLock.locked = false;
-								ofy().save().entity(gaeLock).now();
-							} else {
-								log.warn("Trying to release a non locked Lock '{}'.", lockName);
-							}
-							return null;
+					laeContext.firestore.runTransaction(t -> {
+						final GaeLock gaeLock = t.get(lockRef).get().toObject(GaeLock.class);
+						if (gaeLock != null && gaeLock.locked) {
+							log.debug("Unlocking Lock '{}'.", lockName);
+							gaeLock.locked = false;
+							t.update(lockRef, "locked", false);
+						} else {
+							log.warn("Trying to release a non locked Lock '{}'.", lockName);
 						}
-					});
-				} catch (RuntimeException e) {
+						return null;
+					}).get();
+				} catch (ExecutionException | RuntimeException e) {
 					log.error("Error closing lock:{} error:{}", lockName, e.getMessage(), e);
+					throw new LockReleaseFailedException("Error closing lock:" + lockName, e);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 					throw new LockReleaseFailedException("Error closing lock:" + lockName, e);
 				} finally {
 					closed = true;
@@ -123,11 +115,11 @@ final class GaeLockFactory extends LockFactory {
 			@Override
 			public void ensureValid() throws IOException, AlreadyClosedException {
 				/*
-				 * Always valid. BTW can be checked if the lock still exists, 
+				 * Always valid. BTW can be checked if the lock still exists,
 				 * but it's guaranteed by Objectify transactions, so nothing to do here.
 				 */
 				if (closed) {
-					throw new AlreadyClosedException("Lock " + indexKey + "." + lockName + " already closed");
+					throw new AlreadyClosedException("Lock " + index.getName() + "." + lockName + " already closed");
 				}
 			}
 		};
@@ -139,8 +131,12 @@ final class GaeLockFactory extends LockFactory {
 	 * @return The list of {@link GaeLock} created by this
 	 *         {@link GaeLockFactory}
 	 */
-	List<GaeLock> getLocks(GaeDirectory gaeDirectory) {
-		return ofy().load().type(GaeLock.class).ancestor(gaeDirectory.indexKey).list();
+	List<GaeLock> getLocks(GaeDirectory gaeDirectory) throws ExecutionException, InterruptedException {
+		return laeContext.firestore
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+				.document(gaeDirectory.index.getName())
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(GaeLock.class))
+				.get().get().toObjects(GaeLock.class);
 	}
 
 

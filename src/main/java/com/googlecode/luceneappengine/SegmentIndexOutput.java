@@ -1,17 +1,25 @@
 package com.googlecode.luceneappengine;
 
-import com.googlecode.objectify.cache.PendingFutures;
+import com.google.cloud.firestore.DocumentReference;
+import com.googlecode.luceneappengine.model.LuceneIndex;
+import com.googlecode.luceneappengine.model.Segment;
+import com.googlecode.luceneappengine.model.SegmentHunk;
+import com.googlecode.luceneappengine.model.repository.LaeContext;
 import org.apache.lucene.store.IndexOutput;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.CRC32;
 
-import static com.googlecode.luceneappengine.SegmentHunk.MAX_BYTES_LENGTH;
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import static com.googlecode.luceneappengine.model.SegmentHunk.MAX_BYTES_LENGTH;
 
 class SegmentIndexOutput extends IndexOutput {
 
 	private final Segment segment;
+
+	private final DocumentReference segmentRef;
+
+	private final LaeContext laeContext;
 	
 	private long filePointer;
 	
@@ -24,11 +32,18 @@ class SegmentIndexOutput extends IndexOutput {
 	private final CRC32 crc = new CRC32();
 	
 	private int lastFlushIndex;
-	
-	public SegmentIndexOutput(Segment segment) {
+
+	public SegmentIndexOutput(LaeContext laeContext, LuceneIndex luceneIndex, Segment segment) throws ExecutionException, InterruptedException {
 		super(segment.name, segment.name);
+		this.laeContext = laeContext;
 		this.segment = segment;
-		this.hunk = segment.getHunk(0);
+		this.segmentRef = laeContext.firestore
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+				.document(luceneIndex.getName())
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(Segment.class))
+				.document(segment.name);
+
+		this.hunk = segment.getHunk(laeContext, segmentRef, 0);
 		this.writer = new LimitedByteArrayWriter(hunk.bytes, MAX_BYTES_LENGTH);
 	}
 	/*
@@ -40,13 +55,19 @@ class SegmentIndexOutput extends IndexOutput {
 	    flush();
 	}
 	public void flush() throws IOException {
-	    segment.lastModified = System.currentTimeMillis();
+//	    segment.lastModified = System.currentTimeMillis();
 		writer.flush();
 		hunk.bytes = writer.getBytes();
-		ofy().save().entity(segment);
+		try {
+			laeContext.firestore.document(segmentRef.getPath()).set(segment).get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException(e);
+		} catch (ExecutionException e) {
+			throw new IOException(e);
+		}
+//		laeContext.segmentRepository.save(segment);
 		save(hunk);
-		ofy().flush();
-		PendingFutures.completeAllPendingFutures();
 		/* nothing to do */
 	}
 	/*
@@ -97,8 +118,20 @@ class SegmentIndexOutput extends IndexOutput {
         flush();
         return crc.getValue();
     }
-    private void save(final SegmentHunk hunk) {
-        ofy().save().entity(hunk);
+    private void save(final SegmentHunk hunk) throws IOException {
+		try {
+			laeContext.firestore
+					.document(segmentRef.getPath())
+					.collection(laeContext.firestoreCollectionMapper.getCollectionName(SegmentHunk.class))
+					.document(hunk.id)
+					.set(hunk)
+					.get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException(e);
+		} catch (ExecutionException e) {
+			throw new IOException(e);
+		}
         crc.update(hunk.bytes, lastFlushIndex, writer.position - lastFlushIndex);
         lastFlushIndex = writer.position;
     }

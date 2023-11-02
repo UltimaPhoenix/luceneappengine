@@ -4,7 +4,7 @@
 
 	<groupId>com.googlecode.luceneappengine</groupId>
 	<artifactId>luceneappengine</artifactId>
-	<version>4.5.2-SNAPSHOT</version>
+	<version>5.0.0</version>
 	<packaging>jar</packaging>
 	
 	<name>LuceneAppEngine</name>
@@ -32,6 +32,17 @@
 			<post>http://groups.google.com/group/${googlecode.group.developers}/post</post>
 		</mailingList>
 	</mailingLists>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>26.4.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
@@ -51,6 +62,9 @@
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.10.1</version>
+					<configuration>
+						<enablePreview>true</enablePreview>
+					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
@@ -58,7 +72,15 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.2</version>
+					<version>3.1.2</version>
+					<configuration>
+						<argLine>--enable-preview</argLine>
+						<environmentVariables>
+							<FIRESTORE_HOST>127.0.0.1:8080</FIRESTORE_HOST>
+							<FIRESTORE_EMULATOR_HOST>127.0.0.1:8080</FIRESTORE_EMULATOR_HOST>
+							<GOOGLE_CLOUD_PROJECT>demo-boh</GOOGLE_CLOUD_PROJECT>
+						</environmentVariables>
+					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-source-plugin</artifactId>
@@ -267,15 +289,32 @@
 					</jvmFlags>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+					<compilerArgs>--enable-preview</compilerArgs>
+					<annotationProcessorPaths combine.children="append">
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<argLine>-Xmx512m</argLine>
+		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<jdk.version>17</jdk.version>
+		<release.version>17</release.version>
 		<wagon.scm.version>3.5.2</wagon.scm.version>
 		<wagon.scm.provider.version>1.13.0</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
@@ -285,17 +324,12 @@
 		<license.includedGroups>org.apache.lucene</license.includedGroups>
 		<license.includedArtifacts>lucene-core</license.includedArtifacts>
 
-		<objectify.version>5.1.22</objectify.version>
-		<lucene.version>8.11.2</lucene.version>
+		<lucene.version>9.0.0</lucene.version>
 
 		<slf4j.version>1.7.13</slf4j.version>
 
-		<gae.plugin.version>2.4.3</gae.plugin.version>
-		<gae.version>1.9.90</gae.version>
-		<gae.application.name>${repository.project.name}</gae.application.name>
-		<gae.application.version>test</gae.application.version>
-		<gae.serverId>${repository.project.name}</gae.serverId>
-
+		<gae.plugin.version>2.4.4</gae.plugin.version>
+		<lombok.version>1.18.26</lombok.version>
 		<!-- custom -->
 		<repository.project.name>luceneappengine</repository.project.name>
 		<!-- googlecode -->
@@ -323,20 +357,14 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>1.0.2</version>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-firestore</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.googlecode.objectify</groupId>
-			<artifactId>objectify</artifactId>
-			<version>${objectify.version}</version>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -349,7 +377,7 @@
 		
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
+			<artifactId>lucene-analysis-common</artifactId>
 			<version>${lucene.version}</version>
 			<scope>test</scope>
 		</dependency>
@@ -388,20 +416,26 @@
 			<version>3.12.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.23.1</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- GAE libraries for local testing as described here: http://code.google.com/appengine/docs/java/howto/unittesting.html -->
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-stubs</artifactId>
-			<version>${gae.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-testing</artifactId>
-			<version>${gae.version}</version>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.google.appengine</groupId>-->
+<!--			<artifactId>appengine-api-stubs</artifactId>-->
+<!--			<version>${gae.version}</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.google.appengine</groupId>-->
+<!--			<artifactId>appengine-testing</artifactId>-->
+<!--			<version>${gae.version}</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 	</dependencies>
 
 	<scm>

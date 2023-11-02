@@ -1,10 +1,20 @@
 package com.googlecode.luceneappengine;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.StreamSupport;
 
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.TransactionOptions;
+import com.google.cloud.firestore.WriteBatch;
+import com.googlecode.luceneappengine.model.GaeLock;
+import com.googlecode.luceneappengine.model.LuceneIndex;
+import com.googlecode.luceneappengine.model.Segment;
+import com.googlecode.luceneappengine.model.SegmentHunk;
+import com.googlecode.luceneappengine.model.repository.LaeContext;
 import org.apache.lucene.store.BaseDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
@@ -14,23 +24,15 @@ import org.apache.lucene.util.RamUsageEstimator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.MoreObjects;
-import com.googlecode.luceneappengine.objectify.util.ObjectifyBuilder;
-import com.googlecode.luceneappengine.objectify.util.ObjectifyUtil;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.NotFoundException;
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.TxnType;
-import com.googlecode.objectify.Work;
-import com.googlecode.objectify.cache.PendingFutures;
+
+import static com.google.common.base.MoreObjects.*;
 
 /**
  * Lucene {@link Directory} working in google app engine (GAE) environment.
  * Using this {@link Directory} you can create multiple indexes, each one identified by
- * a name specified in constructor {@link GaeDirectory#GaeDirectory(String)}, 
+ * a name specified in constructor {@link GaeDirectory#GaeDirectory(LaeContext, String)},
  * for details read constructor documentation.
- * <b>In order to open an index writer is highly recommended the usage of configuration provided by 
+ * <b>In order to open an index writer is highly recommended the usage of configuration provided by
  * {@link GaeLuceneUtil#getIndexWriterConfig(org.apache.lucene.analysis.Analyzer)}</b>.
  * <pre>
  * {@code
@@ -41,12 +43,12 @@ import com.googlecode.objectify.cache.PendingFutures;
  * </pre>
  * <br >
  * <i>
- * If your application throws {@link NoClassDefFoundError} while using {@link GaeDirectory} 
- * in order to make it work, into your GAE web application, the modified {@link RamUsageEstimator} 
- * (<a href="http://luceneappengine.googlecode.com/hg/src/main/java/org/apache/lucene/util/RamUsageEstimator.java">link to source</a>) 
+ * If your application throws {@link NoClassDefFoundError} while using {@link GaeDirectory}
+ * in order to make it work, into your GAE web application, the modified {@link RamUsageEstimator}
+ * (<a href="http://luceneappengine.googlecode.com/hg/src/main/java/org/apache/lucene/util/RamUsageEstimator.java">link to source</a>)
  * in a package named <code>org.apache.lucene.util</code>.
  * </i>
- * 
+ *
  * @author Fabio Grucci (github: <i>UltimaPhoenix</i>, bitbucket: <i>Dark_Phoenix</i>, googlecode: <i>fabio.grucci</i>)
  * @see GaeLuceneUtil
  * @see RamUsageEstimator
@@ -54,108 +56,93 @@ import com.googlecode.objectify.cache.PendingFutures;
 public class GaeDirectory extends BaseDirectory {
 
 	private static final Logger log = LoggerFactory.getLogger(GaeDirectory.class);
-	
+
 	private static final String DEFAULT_GAE_LUCENE_INDEX_NAME = "defaultIndex";
-	
-	final Key<LuceneIndex> indexKey;
-	
-	static {
-		ObjectifyService.register(com.googlecode.luceneappengine.GaeLock.class);
-		ObjectifyService.register(com.googlecode.luceneappengine.LuceneIndex.class);
-		ObjectifyService.register(com.googlecode.luceneappengine.Segment.class);
-		ObjectifyService.register(com.googlecode.luceneappengine.SegmentHunk.class);
-	}
-	 
+
+	private final LaeContext laeContext;
+
+	final LuceneIndex index;
+
 	/**
 	 * Create a {@link GaeDirectory} with default name <code>"defaultIndex"</code>.
-	 * Same as {@link GaeDirectory#GaeDirectory(String)} with <code>"defaultIndex"</code>.
+	 * Same as {@link GaeDirectory#GaeDirectory(LaeContext, String)} with <code>"defaultIndex"</code>.
+	 * @param laeContext the laecontext
 	 */
-	public GaeDirectory() {
-		this(DEFAULT_GAE_LUCENE_INDEX_NAME);
+	public GaeDirectory(LaeContext laeContext) {
+		this(laeContext, DEFAULT_GAE_LUCENE_INDEX_NAME);
 	}
 	/**
-	 * Create a {@link GaeDirectory} with specified name, 
-	 * <b>the name specified must be a legal {@link com.google.appengine.api.datastore.Key} name</b>.
+	 * Create a {@link GaeDirectory} with specified name,
+	 * <b>the name specified must be a legal {@link com.google.cloud.firestore.annotation.DocumentId} name</b>.
+	 * @param laeContext The lae context
 	 * @param indexName The name of the index
 	 */
-	public GaeDirectory(String indexName) {
-		super(GaeLockFactory.getInstance());
-		this.indexKey = createIndexIfNotExist(MoreObjects.firstNonNull(indexName, DEFAULT_GAE_LUCENE_INDEX_NAME));
+	public GaeDirectory(LaeContext laeContext, String indexName) {
+		super(new GaeLockFactory(laeContext));
+		this.laeContext = laeContext;
+		this.index = laeContext.luceneIndexRepository.getOrCreate(firstNonNull(indexName, DEFAULT_GAE_LUCENE_INDEX_NAME));
 	}
 	/**
 	 * Create a {@link GaeDirectory} for existing index.
+	 * @param laeContext The laecontext
 	 * @param luceneIndex The existing index
 	 */
-	public GaeDirectory(LuceneIndex luceneIndex) {
-		this(luceneIndex.getName());
+	public GaeDirectory(LaeContext laeContext, LuceneIndex luceneIndex) {
+		this(laeContext, luceneIndex.getName());
 	}
-	
+
 	/**
 	 * Returns every available indexes created into your GAE application.
-	 * With {@link LuceneIndex} you can build {@link GaeDirectory} 
-	 * using constructor {@link GaeDirectory#GaeDirectory(LuceneIndex)}.
+	 * With {@link LuceneIndex} you can build {@link GaeDirectory}
+	 * using constructor {@link GaeDirectory#GaeDirectory(LaeContext, LuceneIndex)}.
+	 * @param context The lae context
 	 * @return A list of available indexes
 	 */
-	public static List<LuceneIndex> getAvailableIndexes() {
-		return ofy().load().type(LuceneIndex.class).list();
+	public static List<LuceneIndex> getAvailableIndexes(LaeContext context) {
+		return context.luceneIndexRepository.findAll();
 	}
 	/**
 	 * Delete this directory.
 	 * @throws IOException If an error occurs
 	 */
 	public void delete() throws IOException {
-		ofy().transactNew(3, new Work<Void>() {
-			@Override
-			public Void run() {
-			    Objectify objectify = ofy();
-				for(String name : listAll())
-					deleteSegment(objectify, name);
-				objectify.delete().key(indexKey);
-				objectify.delete().entities(((GaeLockFactory)lockFactory).getLocks(GaeDirectory.this));
-				return null;
-			}
+		laeContext.luceneIndexRepository.runInTransaction(datastoreReaderWriter -> {
+			Iterable<DocumentReference> allByIndex = segments()
+					.listDocuments();
+			allByIndex.forEach(segment -> segment.collection(laeContext.firestoreCollectionMapper.getCollectionName(SegmentHunk.class)).listDocuments().forEach(datastoreReaderWriter::delete));
+			allByIndex.forEach(datastoreReaderWriter::delete);
+
+			laeContext.firestore.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+					.document(index.getName())
+					.collection(laeContext.firestoreCollectionMapper.getCollectionName(GaeLock.class))
+					.listDocuments()
+					.forEach(datastoreReaderWriter::delete);
+
+			datastoreReaderWriter.delete(laeContext.luceneIndexRepository.findRefById(index.getName()));
+			return null;
 		});
 	}
-	/**
-	 * Delete the segment specified.
-	 * @param name The name of the segment
-	 */
-	protected void deleteSegment(final String name) {
-		ofy().transactNew(4, new Work<Void>() {
-			@Override
-			public Void run() {
-				deleteSegment(ofy(), name);
-				return null;
-			}
-		});
+
+	private CollectionReference segments() {
+		return laeContext.firestore
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+				.document(index.getName())
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(Segment.class));
 	}
-	/**
-	 * Delete the segment using the specified {@link Objectify} useful for transaction.
-	 * @param objectify The {@link Objectify} to use
-	 * @param name The name of the segment to delete
-	 */
-	protected void deleteSegment(final Objectify objectify, final String name) {
-		final Key<Segment> segmentKey = newSegmentKey(name);
-		
-		final Segment segment = objectify.load().key(segmentKey).now();
-		
-		objectify.delete().keys(segment.getHunkKeys(segmentKey));
-		objectify.delete().key(segmentKey);
-	}
-	
-	/**
-	 * Method used for testing purpose useful for printing segment information.
-	 * @param segment The segment to print
-	 * @param name The name of the hunk to print
-	 * @param index The index of the hunk to print
-	 */
-	protected void logSegment(Segment segment, String name, int index) {
-		Objectify objectify = ofy();
-		final SegmentHunk hunk = objectify.load().key(newSegmentHunkKey(name, index)).now();
-		hunk.bytes = Arrays.copyOfRange(hunk.bytes, 0, (int) (hunk.bytes.length % (segment.length / hunk.id)));
-		log.info("Hunk '{}-{}-{}' with length {}, Value={}", 
-				indexKey.getName(), name, hunk.id, hunk.bytes.length, new String(hunk.bytes));
-	}
+
+//	/**
+//	 * Method used for testing purpose useful for printing segment information.
+//	 * @param segment The segment to print
+//	 * @param name The name of the hunk to print
+//	 * @param index The index of the hunk to print
+//	 */
+//	protected void logSegment(Segment segment, String name, int index) {
+//		Objectify objectify = ofy();
+//		final SegmentHunk hunk = objectify.load().key(newSegmentHunkKey(name, index)).now();
+//		hunk.bytes = Arrays.copyOfRange(hunk.bytes, 0, (int) (hunk.bytes.length % (segment.length / hunk.id)));
+//		log.info("Hunk '{}-{}-{}' with length {}, Value={}",
+//				this.index.getName(), name, hunk.id, hunk.bytes.length, new String(hunk.bytes));
+//	}
 	/*
 	 * (non-Javadoc)
 	 * @see org.apache.lucene.store.Directory#close()
@@ -179,8 +166,8 @@ public class GaeDirectory extends BaseDirectory {
 	public IndexInput openInput(String name, IOContext context) throws IOException {
 	    ensureOpen();
 		try {
-			return new SegmentIndexInput(ofy().load().key(newSegmentKey(name)).safe());
-		} catch (NotFoundException e) {
+			return new SegmentIndexInput(laeContext, index, name);
+		} catch (RuntimeException | ExecutionException | InterruptedException e) {
 			throw new IOException(name, e);
 		}
 	}
@@ -191,24 +178,36 @@ public class GaeDirectory extends BaseDirectory {
 	@Override
 	public IndexOutput createOutput(String name, IOContext context) throws IOException {
 	    ensureOpen();
-		final Objectify begin = ofy();
-		Segment segment = begin.load().key(newSegmentKey(name)).now();
-		if(segment == null) {
-			segment = newSegment(name);
+		try {
+			Segment segment = segments().document(name).get().get().toObject(Segment.class);
+			if (segment == null) {
+				segment = newSegment(name);
+			}
+			return new SegmentIndexOutput(laeContext, index, segment);
+		} catch (ExecutionException e) {
+			throw new IOException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException(e);
 		}
-		return new SegmentIndexOutput(segment);
 	}
 
 	@Override
 	public IndexOutput createTempOutput(String prefix, String suffix, IOContext context) throws IOException {
 		final String tempName = prefix + "_" + UUID.randomUUID().toString() + "_" + suffix;
 		ensureOpen();
-		final Objectify begin = ofy();
-		Segment segment = begin.load().key(newSegmentKey(tempName)).now();
-		if(segment == null) {
-			segment = newSegment(tempName);
+		try {
+			Segment segment = segments().document(tempName).get().get().toObject(Segment.class);
+			if(segment == null) {
+				segment = newSegment(tempName);
+			}
+			return new SegmentIndexOutput(laeContext, index, segment);
+		} catch (ExecutionException e) {
+			throw new IOException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException(e);
 		}
-		return new SegmentIndexOutput(segment);
 	}
 
 	/*
@@ -217,34 +216,53 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public void deleteFile(String name) {
-		final Objectify objectify = ofy();
-		final Segment segment = objectify.load().key(newSegmentKey(name)).now();
-		
-		final long hunkCount = segment.hunkCount;
-		for (int i = 1; i <= hunkCount; i++) {
-			objectify.delete().key(newSegmentHunkKey(name, i));
-		}
-		objectify.delete().key(newSegmentKey(name));
+		WriteBatch batch = laeContext.firestore.batch();
+
+		DocumentReference segmentRef = segments().document(name);
+		batch.delete(segmentRef);
+		segmentRef.collection(laeContext.firestoreCollectionMapper.getCollectionName(SegmentHunk.class)).listDocuments().forEach(batch::delete);
+		batch.commit();
 	}
 	@Override
 	public void rename(final String source, final String dest) throws IOException {
-		ofy().execute(TxnType.REQUIRES_NEW, (Work<Void>) () -> {
-			Segment sourceSegment = ofy().load().key(newSegmentKey(source)).now();
+		try {
+			laeContext.firestore.runTransaction(t -> {
+				DocumentReference segmentRef = segments().document(source);
+				Segment sourceSegment = segmentRef.get().get().toObject(Segment.class);
+				Iterable<DocumentReference> allBySegment = segmentRef.collection(laeContext.firestoreCollectionMapper.getCollectionName(SegmentHunk.class)).listDocuments();
 
-			Segment destSegment = copySegment(sourceSegment);
-			destSegment.name = dest;
-			Key<Segment> destSegmentKey = ofy().save().entity(destSegment).now();
+				Segment destSegment = new Segment(dest);
+				destSegment.length = sourceSegment.length;
+				destSegment.lastModified = sourceSegment.lastModified;
+				destSegment.hunkCount = sourceSegment.hunkCount;
+				DocumentReference destSegmentRef = laeContext.firestore.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+						.document(index.getName())
+						.collection(laeContext.firestoreCollectionMapper.getCollectionName(Segment.class))
+						.document(destSegment.name);
+				destSegmentRef
+						.set(destSegment)
+						.get();
 
-			final long hunkCount = sourceSegment.hunkCount;
-			for (int i = 0; i < hunkCount; i++) {
-				SegmentHunk hunk = sourceSegment.getHunk(i);
-				SegmentHunk destHunk = copySegmentHunk(hunk);
-				destHunk.segment = destSegmentKey;
-				ofy().save().entity(destHunk);
-			}
-			deleteFile(source);
-			return null;
-		});
+
+				for (DocumentReference segmentHunk : allBySegment) {
+					SegmentHunk sourceHunk = segmentHunk.get().get().toObject(SegmentHunk.class);
+					SegmentHunk destHunk = new SegmentHunk(sourceHunk.id);
+					destHunk.bytes = sourceHunk.bytes;
+					destSegmentRef.collection(laeContext.firestoreCollectionMapper.getCollectionName(SegmentHunk.class))
+							.document(destHunk.id)
+							.set(destHunk);
+				}
+
+				deleteFile(source);
+				return null;
+			}, TransactionOptions.createReadWriteOptionsBuilder().build())
+					.get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/*
 	 * (non-Javadoc)
@@ -252,8 +270,19 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public long fileLength(String name) throws IOException {
-		final Segment bigTableIndexFile = ofy().load().key(newSegmentKey(name)).now();
-		return bigTableIndexFile.length;
+		try {
+			final Segment bigTableIndexFile = laeContext.firestore
+					.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+					.document(index.getName())
+					.collection(laeContext.firestoreCollectionMapper.getCollectionName(Segment.class))
+					.document(name).get().get().toObject(Segment.class);
+			return bigTableIndexFile.length;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException(e);
+		} catch (ExecutionException e) {
+			throw new IOException(e);
+		}
 	}
 	/*
 	 * (non-Javadoc)
@@ -261,67 +290,63 @@ public class GaeDirectory extends BaseDirectory {
 	 */
 	@Override
 	public String[] listAll() {
-		final Objectify objectify = ofy();
-		final List<Key<Segment>> keys = objectify.load().type(Segment.class).ancestor(indexKey).keys().list();
-		String[] names = new String[keys.size()];
-		int i = 0;
-		for (Key<Segment> name : keys)
-			names[i++] = name.getName();
-		return names;
+		List<String> files = StreamSupport.stream(
+			laeContext.firestore
+					.collection(laeContext.firestoreCollectionMapper.getCollectionName(LuceneIndex.class))
+					.document(index.getName())
+					.collection(laeContext.firestoreCollectionMapper.getCollectionName(Segment.class))
+					.listDocuments()
+					.spliterator(), false)
+				.map(DocumentReference::getId).toList();
+		return files.toArray(new String[0]);
 	}
+
 	/**
-	 * Create a new segment with the specified name using the specified {@link Objectify}.
-	 * The {@link Segment} contains one empty {@link SegmentHunk}.
-	 * @param name The name of the segment to create
-	 * @return A new {@link Segment} with one {@link SegmentHunk} 
+	 * Create a new file in the index.
+	 * @param name The name of the segment/file
+	 * @return the instance of the Segment
+	 * @throws ExecutionException If an error occurs
+	 * @throws InterruptedException If the thread is interrupted
 	 */
-	protected Segment newSegment(String name) {
-		Segment segment = new Segment(indexKey, name);
+	protected Segment newSegment(String name) throws ExecutionException, InterruptedException {
+		Segment segment = new Segment(name);
 		SegmentHunk newHunk = segment.newHunk();//at least one segment
 		segment.lastModified = System.currentTimeMillis();
-		ofy().save().entities(segment, newHunk).now();
+		//TODO; bulk?
+		DocumentReference segmentRef = segments()
+				.document(segment.name);
+
+		segmentRef.create(segment).get();
+
+		laeContext.firestore.document(segmentRef.getPath())
+				.collection(laeContext.firestoreCollectionMapper.getCollectionName(SegmentHunk.class))
+				.document(newHunk.id)
+				.create(newHunk)
+				.get();
+
 		log.debug("Created segment '{}'.", name);
 		return segment;
-	}
-	
-	private Key<SegmentHunk> newSegmentHunkKey(final String name, long count) {
-		return Key.create(newSegmentKey(name), SegmentHunk.class, count);
-	}
-	private Key<Segment> newSegmentKey(final String name) {
-		return Key.create(indexKey, Segment.class, name);
-	}
-	private static Key<LuceneIndex> createIndexIfNotExist(String indexName) {
-		Key<LuceneIndex> key = Key.create(LuceneIndex.class, indexName);
-		ObjectifyUtil.getOrCreate(key, new LuceneIndexBuilder());
-		return key;
-	}
-	
-	private static class LuceneIndexBuilder implements ObjectifyBuilder<LuceneIndex>{
-		@Override
-		public LuceneIndex newInstance(Key<LuceneIndex> key) {
-			return new LuceneIndex(key.getName());
-		}
 	}
 
 	@Override
 	public void sync(Collection<String> names) throws IOException {
-		PendingFutures.completeAllPendingFutures();
+//		PendingFutures.completeAllPendingFutures();
 	}
 	@Override
 	public void syncMetaData() throws IOException {
-		PendingFutures.completeAllPendingFutures();
+//		PendingFutures.completeAllPendingFutures();
 	}
 	private Segment copySegment(Segment sourceSegment) {
-		Segment copy = new Segment(indexKey, sourceSegment.name);
+		Segment copy = new Segment(sourceSegment.name);
 		copy.lastModified = System.currentTimeMillis();
 		copy.length = sourceSegment.length;
 		copy.hunkCount = sourceSegment.hunkCount;
 		return copy;
 	}
 	private SegmentHunk copySegmentHunk(SegmentHunk hunk) {
-		SegmentHunk copy = new SegmentHunk(hunk.segment, hunk.id);
+		SegmentHunk copy = new SegmentHunk(hunk.id);
 		copy.bytes = hunk.bytes;
 		return copy;
 	}
-	
+
 }
