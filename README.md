@@ -9,6 +9,7 @@ Live Demo:
  * See it in action ([live demo site](https://bigtable-lucene.appspot.com)) or check the [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
 
 Main Features:
+  * LAE 5.0.x compatible with Lucene 9.0.x
   * LAE 4.5.x compatible with Lucene 8.6.x, 8.7.x, 8.8.x, 8.9.x, 8.10.x
   * LAE 4.4.x compatible with Lucene 8.2.x, 8.3.x, 8.4.x, 8.5.x
   * LAE 4.3.x compatible with Lucene 8.1.x
@@ -45,6 +46,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 02-11-2023 LAE 5 officially out (breaking changes) can be considered a new product. 
   * 30-06-2023 LAE 5 currently working fine in local environment 
   * 24-06-2023 The LAE example project will be rewritten using Micronaut framework
   * 01-04-2023 Existing examples and wiki will be completely deprecated 
