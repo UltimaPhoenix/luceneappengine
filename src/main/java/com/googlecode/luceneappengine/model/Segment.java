@@ -12,10 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutionException;
 
-
-//@Entity
-//@Unindex
-//@Cache
+/**
+ * A file in the index.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,20 +26,40 @@ public final class Segment implements FireStoreEntity {
 //	@Parent
 //	public final LuceneIndex index;
 
+	/**
+	 * The filename
+	 */
 	@DocumentId
 	public String name;
-	
+	/**
+	 * The file length
+	 */
 	public long length;
-	
+	/**
+	 * The last modified date.
+	 */
 	public long lastModified;
-	
+	/**
+	 * The number of hunks.
+	 */
 	public long hunkCount;
 
+	/**
+	 * Create a new segment.
+	 * @param name The name of the segment
+	 */
 	public Segment(String name) {
 		this.name = name;
 //		this.index = index;
 	}
-	
+
+	/**
+	 * Return a specific hunk in the segment.
+	 * @param laeContext The context
+	 * @param segmentPath The document reference
+	 * @param index The index of the segment
+	 * @return the specific segment hunk
+	 */
 	public SegmentHunk getHunk(LaeContext laeContext, DocumentReference segmentPath, int index) {//GAE id can not start from zero
 		try {
 			return laeContext.firestore.document(segmentPath.getPath())
@@ -54,7 +73,11 @@ public final class Segment implements FireStoreEntity {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
+	/**
+	 * Create a new segment hunk.
+	 * @return create a new hunk in this segment
+	 */
 	public SegmentHunk newHunk() {
 		hunkCount++;
 		log.debug("Created Hunk '{}-{}-{}'.", "index.getName()", name, hunkCount);

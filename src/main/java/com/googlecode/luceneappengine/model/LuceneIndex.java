@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Objects;
 
 /**
  * Class representing a GAE store index.
@@ -15,9 +14,6 @@ import java.util.Objects;
  * @author Fabio Grucci (github: <i>UltimaPhoenix</i>, bitbucket: <i>Dark_Phoenix</i>, googlecode: <i>fabio.grucci</i>)
  *
  */
-//@Entity
-//@Unindex
-//@Cache
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,6 +24,10 @@ public final class LuceneIndex implements FireStoreEntity {
 	@DocumentId
 	String name;
 
+	/**
+	 * Create an index with a name.
+	 * @param name The name of the index
+	 */
 	public LuceneIndex(String name) {
 		this.name = name;
 	}

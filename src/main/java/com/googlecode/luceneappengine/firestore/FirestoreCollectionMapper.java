@@ -1,13 +1,12 @@
 package com.googlecode.luceneappengine.firestore;
 
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.Firestore;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.luceneappengine.model.*;
 
+/**
+ * A class that maps the collections in firestore.
+ */
 public class FirestoreCollectionMapper {
-
-    Firestore firestore;
 
     private static final ImmutableMap<Class<? extends FireStoreEntity>, String> collectionNames = ImmutableMap.of(
             LuceneIndex.class, "lucene_indexes",
@@ -16,18 +15,14 @@ public class FirestoreCollectionMapper {
             SegmentHunk.class, "hunks"
     );
 
+    /**
+     * Return the firestore collection given the class.
+     * @param clazz the class
+     * @return the firestore collection name
+     * @param <EI> the classtype
+     */
     public <EI extends FireStoreEntity> String getCollectionName(Class<EI> clazz) {
         return collectionNames.getOrDefault(clazz, clazz.getSimpleName());
-    }
-
-    public <EI extends FireStoreEntity> CollectionReference getCollectionReference(EI entity) {
-        return switch (entity) {
-            case LuceneIndex e -> firestore.collection(getCollectionName(LuceneIndex.class));
-//            firestore.document(e.parentCollection.getPath()).collection(getCollectionName(GaeLock.class))
-            case GaeLock e -> null;
-            case Segment e -> null;
-            case SegmentHunk e -> null;
-        };
     }
 
 

@@ -30,7 +30,7 @@ import static com.google.common.base.MoreObjects.*;
 /**
  * Lucene {@link Directory} working in google app engine (GAE) environment.
  * Using this {@link Directory} you can create multiple indexes, each one identified by
- * a name specified in constructor {@link GaeDirectory#GaeDirectory(String)},
+ * a name specified in constructor {@link GaeDirectory#GaeDirectory(LaeContext, String)},
  * for details read constructor documentation.
  * <b>In order to open an index writer is highly recommended the usage of configuration provided by
  * {@link GaeLuceneUtil#getIndexWriterConfig(org.apache.lucene.analysis.Analyzer)}</b>.
@@ -65,14 +65,16 @@ public class GaeDirectory extends BaseDirectory {
 
 	/**
 	 * Create a {@link GaeDirectory} with default name <code>"defaultIndex"</code>.
-	 * Same as {@link GaeDirectory#GaeDirectory(String)} with <code>"defaultIndex"</code>.
+	 * Same as {@link GaeDirectory#GaeDirectory(LaeContext, String)} with <code>"defaultIndex"</code>.
+	 * @param laeContext the laecontext
 	 */
 	public GaeDirectory(LaeContext laeContext) {
 		this(laeContext, DEFAULT_GAE_LUCENE_INDEX_NAME);
 	}
 	/**
 	 * Create a {@link GaeDirectory} with specified name,
-	 * <b>the name specified must be a legal {@link com.google.appengine.api.datastore.Key} name</b>.
+	 * <b>the name specified must be a legal {@link com.google.cloud.firestore.annotation.DocumentId} name</b>.
+	 * @param laeContext The lae context
 	 * @param indexName The name of the index
 	 */
 	public GaeDirectory(LaeContext laeContext, String indexName) {
@@ -82,6 +84,7 @@ public class GaeDirectory extends BaseDirectory {
 	}
 	/**
 	 * Create a {@link GaeDirectory} for existing index.
+	 * @param laeContext The laecontext
 	 * @param luceneIndex The existing index
 	 */
 	public GaeDirectory(LaeContext laeContext, LuceneIndex luceneIndex) {
@@ -91,7 +94,8 @@ public class GaeDirectory extends BaseDirectory {
 	/**
 	 * Returns every available indexes created into your GAE application.
 	 * With {@link LuceneIndex} you can build {@link GaeDirectory}
-	 * using constructor {@link GaeDirectory#GaeDirectory(LuceneIndex)}.
+	 * using constructor {@link GaeDirectory#GaeDirectory(LaeContext, LuceneIndex)}.
+	 * @param context The lae context
 	 * @return A list of available indexes
 	 */
 	public static List<LuceneIndex> getAvailableIndexes(LaeContext context) {
@@ -126,12 +130,12 @@ public class GaeDirectory extends BaseDirectory {
 				.collection(laeContext.firestoreCollectionMapper.getCollectionName(Segment.class));
 	}
 
-	/**
-	 * Method used for testing purpose useful for printing segment information.
-	 * @param segment The segment to print
-	 * @param name The name of the hunk to print
-	 * @param index The index of the hunk to print
-	 */
+//	/**
+//	 * Method used for testing purpose useful for printing segment information.
+//	 * @param segment The segment to print
+//	 * @param name The name of the hunk to print
+//	 * @param index The index of the hunk to print
+//	 */
 //	protected void logSegment(Segment segment, String name, int index) {
 //		Objectify objectify = ofy();
 //		final SegmentHunk hunk = objectify.load().key(newSegmentHunkKey(name, index)).now();
@@ -296,6 +300,14 @@ public class GaeDirectory extends BaseDirectory {
 				.map(DocumentReference::getId).toList();
 		return files.toArray(new String[0]);
 	}
+
+	/**
+	 * Create a new file in the index.
+	 * @param name The name of the segment/file
+	 * @return the instance of the Segment
+	 * @throws ExecutionException If an error occurs
+	 * @throws InterruptedException If the thread is interrupted
+	 */
 	protected Segment newSegment(String name) throws ExecutionException, InterruptedException {
 		Segment segment = new Segment(name);
 		SegmentHunk newHunk = segment.newHunk();//at least one segment
@@ -312,8 +324,6 @@ public class GaeDirectory extends BaseDirectory {
 				.create(newHunk)
 				.get();
 
-//		laeContext.segmentRepository.save(segment);
-//		laeContext.segmentHunkRepository.save(newHunk);
 		log.debug("Created segment '{}'.", name);
 		return segment;
 	}
