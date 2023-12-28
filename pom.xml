@@ -316,7 +316,7 @@
 		<jdk.version>17</jdk.version>
 		<release.version>17</release.version>
 		<wagon.scm.version>3.5.2</wagon.scm.version>
-		<wagon.scm.provider.version>1.13.0</wagon.scm.provider.version>
+		<wagon.scm.provider.version>2.0.1</wagon.scm.provider.version>
 		<pushChanges>false</pushChanges>
 
 		<license.licenseName>apache_v2</license.licenseName>
