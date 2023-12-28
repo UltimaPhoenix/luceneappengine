@@ -476,7 +476,6 @@
                 <configuration>
                     <links>
 						<link>https://javadoc.io/doc/org.apache.lucene/lucene-core/8.9.0/</link>
-						<link>https://javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22/</link>
                     </links>
                     <excludePackageNames>org.apache.lucene.*</excludePackageNames>
                 </configuration>
