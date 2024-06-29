@@ -6,7 +6,7 @@ This project provides a directory useful to build Lucene and Google App Engine p
 ![https://lucene.apache.org/theme/images/lucene/lucene_logo_green_300.png](https://lucene.apache.org/theme/images/lucene/lucene_logo_green_300.png) ![https://www.google.com/accounts/ah/appengine.jpg](https://www.google.com/accounts/ah/appengine.jpg)
 
 Live Demo:
- * See it in action ([live demo site](https://bigtable-lucene.appspot.com)) or check the [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
+ * See it in action ([live demo site](https://lae-firestore.appspot.com)) or check the [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
 
 Main Features:
   * LAE 5.0.x compatible with Lucene 9.0.x
@@ -46,6 +46,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 29-06-2024 Reduced dependencies no long require Objectify
   * 02-11-2023 LAE 5 officially out (breaking changes) can be considered a new product. 
   * 30-06-2023 LAE 5 currently working fine in local environment 
   * 24-06-2023 The LAE example project will be rewritten using Micronaut framework
@@ -117,7 +118,7 @@ Coming Soon:
 
 
 # Usage and Config
-Check the [wiki page](../../wiki/Usage-and-Configuration). Or start from the [live demo source](https://github.com/UltimaPhoenix/lucene-appengine-examples)
+Check the [wiki page](../../wiki/Usage-and-Configuration). Or start from the [live demo source](https://lae-firestore.appspot.com)
 
 ## Development
 If you like this project, you can [choose a kind of donation here](../../wiki/Donate) or
