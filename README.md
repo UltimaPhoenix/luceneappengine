@@ -10,6 +10,15 @@ Live Demo:
 
 Main Features:
   * LAE 5.0.x compatible with Lucene 9.0.x
+  * Storage in google cloud firestore
+  * Supported operations: Add, Remove, Update, Index, Deindex, everything?! (I need you to check)
+  * Multiple indexes in the same application
+  * No more index size limit of 1MB
+  * Yes! It works, see it in action ([live demo site](https://lae-firestore.appspot.com)) with  [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
+  * Open your mind to new Google App Engine applications powered by Lucene
+  * For high performance applications use [google app engine task queue](https://developers.google.com/appengine/docs/java/taskqueue)
+
+Deprecated features existing LAE < 5.x.x (no longer supported):
   * LAE 4.5.x compatible with Lucene 8.6.x, 8.7.x, 8.8.x, 8.9.x, 8.10.x
   * LAE 4.4.x compatible with Lucene 8.2.x, 8.3.x, 8.4.x, 8.5.x
   * LAE 4.3.x compatible with Lucene 8.1.x
@@ -33,7 +42,7 @@ Main Features:
   * Multiple indexes in the same application
   * No more ([the wrong](http://stackoverflow.com/questions/9176993/disable-concurrentmergescheduler-in-lucene-3-5-0/12164826#12164826)) [RAMDirectory](http://lucene.apache.org/core/3_6_1/api/all/org/apache/lucene/store/RAMDirectory.html) for Google App Engine powered applications
   * No more index size limit of 1MB
-  * Yes! It works, see it in action ([live demo site](https://bigtable-lucene.appspot.com)) with  [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
+  * Yes! It works, see it in action ([live demo site (no longer available)](https://bigtable-lucene.appspot.com)) with  [source code](https://github.com/UltimaPhoenix/lucene-appengine-examples)
   * Open your mind to new Google App Engine applications powered by Lucene
   * For high performance applications use [google app engine task queue](https://developers.google.com/appengine/docs/java/taskqueue)
   * [Memcache](https://developers.google.com/appengine/docs/java/memcache/) supported and integrated for all versions
@@ -46,6 +55,7 @@ Coming Soon:
   * buffer management
 
 ## News
+  * 14-07-2024 Update LAE examples to google-cloud-firestore and a brand new demo project now powered by Micronaut and in Java 17
   * 29-06-2024 Reduced dependencies no long require Objectify
   * 02-11-2023 LAE 5 officially out (breaking changes) can be considered a new product. 
   * 30-06-2023 LAE 5 currently working fine in local environment 
