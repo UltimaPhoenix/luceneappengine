@@ -328,7 +328,7 @@
 
 		<slf4j.version>1.7.13</slf4j.version>
 
-		<gae.plugin.version>2.4.4</gae.plugin.version>
+		<gae.plugin.version>2.8.1</gae.plugin.version>
 		<lombok.version>1.18.32</lombok.version>
 		<!-- custom -->
 		<repository.project.name>luceneappengine</repository.project.name>
